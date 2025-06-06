@@ -1,0 +1,1 @@
+SELECT * FROM users WHERE email = 'user1@mail.com';

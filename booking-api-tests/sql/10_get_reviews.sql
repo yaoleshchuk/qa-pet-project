@@ -1,0 +1,1 @@
+SELECT * FROM reviews WHERE hotel_id = 321;

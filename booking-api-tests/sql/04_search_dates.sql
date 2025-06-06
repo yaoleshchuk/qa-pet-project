@@ -1,0 +1,1 @@
+SELECT * FROM hotels WHERE city = 'Paris' AND available_from <= '2025-07-01' AND available_to >= '2025-07-05';
