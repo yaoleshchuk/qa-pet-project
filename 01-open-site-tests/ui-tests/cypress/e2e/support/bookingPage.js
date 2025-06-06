@@ -1,10 +1,8 @@
 require('dotenv').config();
 
-require('dotenv').config();
-
 class BookingPage {
   visit() {
-    cy.visit('https://www.booking.com');
+    cy.visit(Cypress.env('baseUrl') || 'https://www.booking.com');
   }
 
   clickButton(label) {
@@ -17,6 +15,26 @@ class BookingPage {
 
   enterPassword(password) {
     cy.get('input[type=password]').first().type(password);
+  }
+
+  search(city, checkin, checkout, adults) {
+    cy.get('input[name="ss"]').clear().type(city);
+    cy.get('button[type=submit]').click();
+    // NOTE: Add date/adult picker selectors if needed
+  }
+
+  applyFilter(filterName) {
+    cy.contains(filterName).click({ force: true });
+  }
+
+  selectLanguage(language) {
+    cy.get('[data-testid="header-language-picker-trigger"]').click();
+    cy.contains(language).click({ force: true });
+  }
+
+  selectCurrency(currency) {
+    cy.get('[data-testid="header-currency-picker-trigger"]').click();
+    cy.contains(currency).click({ force: true });
   }
 }
 
