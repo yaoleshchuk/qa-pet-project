@@ -1,0 +1,41 @@
+name: Quality Gate - Nightly Full Run
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Every day at 00:00 UTC = 01:00 CET
+
+jobs:
+  full-run:
+    name: Full Test Run - Acceptance + Smoke + Regression
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          echo "Installing (mocked)"
+          sleep 2
+
+      - name: Run full test suite
+        run: |
+          echo "::group::Running @acceptance, @smoke, @regression"
+          echo "Acceptance: ✅"
+          echo "Smoke: ✅"
+          echo "Regression: ❌ ❗️(2 failed tests)"
+          echo "::endgroup::"
+
+      - name: Generate Allure Report (mocked)
+        run: |
+          mkdir -p allure-results
+          echo "Acceptance: OK" > allure-results/acceptance.txt
+          echo "Smoke: OK" > allure-results/smoke.txt
+          echo "Regression: ❗ Some failed tests" > allure-results/regression.txt
+        continue-on-error: true
+
+      - name: Upload Allure Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report-nightly
+          path: allure-results
