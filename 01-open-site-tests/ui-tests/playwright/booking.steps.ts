@@ -1,3 +1,7 @@
+import dotenv from 'dotenv';
+dotenv.config();
+import dotenv from 'dotenv';
+dotenv.config();
 import { Given, When, Then } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
 import { BookingPage } from '../pages/bookingPage';
