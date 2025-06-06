@@ -1,3 +1,5 @@
+
+// --- bookingPage.js ---
 require('dotenv').config();
 
 class BookingPage {
