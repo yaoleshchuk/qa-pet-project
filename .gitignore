@@ -1,0 +1,38 @@
+# macOS
+.DS_Store
+
+# Node
+node_modules/
+dist/
+*.log
+
+# Cypress
+cypress/videos/
+cypress/screenshots/
+cypress/results/
+cypress/downloads/
+
+# Playwright
+test-results/
+playwright-report/
+trace.zip
+
+# Env & config
+.env
+.env.local
+
+# System
+*.zip
+*.tar
+*.gz
+*.rar
+
+# IDEs & editors
+.idea/
+.vscode/
+*.iml
+
+# Reports
+allure-report/
+*.html
+coverage/
