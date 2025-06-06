@@ -1,76 +1,85 @@
-# 🧪 Booking UI Tests — Real-World QA Automation Project
+# QA Pet Project
 
-This project showcases a complete E2E QA setup using **Gherkin**, **Cypress**, **Playwright**, and **GitHub Actions**, focused on the popular website **Booking.com**.
-
----
-
-## 📁 Project Directory: `booking-ui-tests/`
-
-A self-contained folder with everything you need:
-- ✍️ **Manual test cases** written in Gherkin (Background, Outline, Examples)
-- ⚙️ **Cypress automation** (JS, Cucumber, Page Object, `.env`)
-- 🧭 **Playwright automation** (TS, Cucumber, Page Object, `.env`)
-- ✅ Shared Gherkin source — no duplication
-- 🧪 Multi-tag test strategy: `@Acceptance`, `@Smoke`, `@Regression`
-- 🏷️ Prioritized: `# Priority: High|Medium|Low`
-- 🔐 Configurable with `.env` and `.env.example`
+This project showcases a complete E2E QA setup using **Gherkin**, **Cypress**, **Playwright**, and **GitHub Actions**, focused on the popular website **Booking.com**
 
 ---
 
-## 🚦 CI/CD — Quality Gates with GitHub Actions
+## ✅ Main Module: `booking - tests - example`
 
-All tests are fully integrated into a CI flow that includes:
+End-to-end tests for [Booking.com](https://booking.com) using **Gherkin** syntax and modern automation tools.
 
-### ✅ Manual Workflow Trigger
-Run tests on demand via the GitHub UI.
-- Choose between `acceptance`, `smoke`, or `regression`
-- Mocks test results, always green
-- Allure report generated for demo purposes
+### ✍ Manual Tests
+- All written in **Gherkin** syntax: Scenario, Background, Scenario Outline with parameters
+- Tests organized by **test suite** (Acceptance / Smoke / Regression)
+- Each test has **priority** (High / Medium / Low) and **ID**
+- Covers both `e2e` and `API` flows
+- Stored under `/tests/manual/`
 
-🔗 `.github/workflows/manual-quality-gate.yml`
+### ⚙️ Automation Support
 
----
+| Tool        | Description                                 |
+|-------------|---------------------------------------------|
+| **Cypress** | Cross-browser UI tests with reusable steps and selectors |
+| **Playwright** | PageObject-based UI tests + API support + `.env` |
+| `.env`      | All test data, credentials, and config       |
 
-### 🔁 Auto Trigger on `main` Push
-Every push to `main` runs the **@acceptance** tests.
-- Ensures critical flows always stay green
-- Lightweight, stable CI signal
-
-🔗 `.github/workflows/on-main-acceptance.yml`
-
----
-
-### 🌙 Nightly Full Run
-Scheduled to run every day at **01:00 CET**
-- Simulates full regression run with "detected" bugs
-- Mocks failing tests to show potential issues
-- Allure report included
-
-🔗 `.github/workflows/nightly-full-run.yml`
-
----
-
-## 🛠 Usage Instructions
-
-```bash
-# Install dependencies
-npm install
-
-# Run Cypress
-npx cypress open
-
-# Run Playwright
-npx playwright test
-
-# Setup environment variables
-cp .env.example .env
+📦 Automation structure:
+```
+/tests/
+├── manual/                 # Single source of truth for Gherkin features
+├── automation/
+│   ├── e2e/
+│   │   ├── cypress/        # Cypress UI automation
+│   │   │   ├── steps/
+│   │   │   ├── pages/
+│   │   ├── playwright/     # Playwright UI + API automation
+│   │   │   ├── steps/
+│   │   │   ├── pages/
+│   │   │   ├── utils.ts
+│   ├── api/                # API automation
 ```
 
 ---
 
-## 🙌 Author
+## 🔐 `.env` usage
 
-Crafted by **Yaroslav Oleshchuk**  
-Senior QA Engineer | AdTech Specialist | Automation Addict  
+Environment variables are stored in `.env` (excluded from Git).
+
+Example:
+```env
+BASE_URL=https://booking.com
+TEST_EMAIL=test@example.com
+TEST_PASSWORD=12345678
+```
+
+Used inside Playwright and Cypress to avoid hardcoded secrets.
+
+---
+
+## 🧪 Quality Gates (GitHub Actions)
+
+CI/CD setup simulates a professional QA workflow:
+
+### ✅ Manual Trigger:
+Run **any test suite** (Acceptance / Smoke / Regression) via workflow dispatch
+
+### 🔁 On Merge to `main`:
+Auto-run **Acceptance** tests
+
+### 🕐 Daily Scheduled Run:
+Auto-run **all tests** (Acceptance + Smoke + Regression) at 01:00 CET
+
+🎯 Allure reports integrated. Acceptance tests are mocked to always pass. Full runs catch simulated failures.
+
+---
+
+## 🚀 Coming Soon
+
+- Full mock AdTech app for simulation
+- Test case review bot powered by AI
+- SQL & curl-based API checks with coverage
+
+---
+
+Built with ♥ by Yaroslav Oleshchuk
 [LinkedIn](https://linkedin.com/in/yaoleshchuk)
-
