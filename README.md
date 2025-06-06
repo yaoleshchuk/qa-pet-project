@@ -1,83 +1,76 @@
-# 🧪 QA Pet Project — Booking UI Testing
+# 🧪 Booking UI Tests — Real-World QA Automation Project
 
-This repository demonstrates a real-world QA setup built from scratch using **Gherkin**, **Cypress**, **Playwright**, and **GitHub Actions CI/CD** — all centered around testing a public website: **Booking.com**.
-
----
-
-## 🔍 What’s Inside `01-open-site-tests/`
-
-> A complete E2E testing setup for Booking.com with:
-- ✅ **Manual test cases** written in clean Gherkin syntax with Backgrounds and Scenario Outlines
-- 🧪 **Cypress automation** using Cucumber, Page Object Model, and regex-powered reusable step definitions
-- 🧭 **Playwright automation** with the same Gherkin source and mirrored test coverage
-- 🌍 Multi-language & currency switch coverage
-- 🔐 Login form validation
-- 🧠 Form field testing
-- 🧩 Advanced filters and dynamic search results
-
-### ✨ Test Design Features
-- Full support for `Background`, `Scenario Outline`, and `Examples`
-- Tagged scenarios: `@Acceptance`, `@Smoke`, `@Regression`
-- Priorities: `High`, `Medium`, `Low`
-- `.env` file support to secure test data and auth credentials
-- Organized by roles: **features**, **steps**, **pages**
-- DRY structure: no Gherkin duplication between manual & automation
+This project showcases a complete E2E QA setup using **Gherkin**, **Cypress**, **Playwright**, and **GitHub Actions**, focused on the popular website **Booking.com**.
 
 ---
 
-## 🚦 CI/CD — Quality Gates (GitHub Actions)
+## 📁 Project Directory: `booking-ui-tests/`
 
-A modern, layered testing flow powered by **GitHub Actions**, designed with visibility and control in mind:
-
-### 🔘 Manual Quality Gate
-Run any group of tests manually by selecting the tag (`acceptance`, `smoke`, `regression`) from the UI.
-
-📁 File: `.github/workflows/manual-quality-gate.yml`
-
-> ✅ Always green — tests are mocked to simulate successful runs  
-> 📊 Allure report is generated and archived (mocked)
-
----
-
-### 🔁 Auto-Run on Main Push
-Whenever code is merged into `main`, **only the `@acceptance` tests** are triggered automatically.
-
-📁 File: `.github/workflows/on-main-acceptance.yml`
-
-> 🎯 Fast validation of the most critical flows  
-> 🔐 Report archived, no flaky test risk (mocked pass)
+A self-contained folder with everything you need:
+- ✍️ **Manual test cases** written in Gherkin (Background, Outline, Examples)
+- ⚙️ **Cypress automation** (JS, Cucumber, Page Object, `.env`)
+- 🧭 **Playwright automation** (TS, Cucumber, Page Object, `.env`)
+- ✅ Shared Gherkin source — no duplication
+- 🧪 Multi-tag test strategy: `@Acceptance`, `@Smoke`, `@Regression`
+- 🏷️ Prioritized: `# Priority: High|Medium|Low`
+- 🔐 Configurable with `.env` and `.env.example`
 
 ---
 
-### 🌙 Nightly Full Test Suite
-Runs every night at **01:00 CET**. Executes:
-- ✅ Acceptance tests
-- ✅ Smoke tests
-- ❌ Regression tests (mocked to simulate bugs)
+## 🚦 CI/CD — Quality Gates with GitHub Actions
 
-📁 File: `.github/workflows/nightly-full-run.yml`
+All tests are fully integrated into a CI flow that includes:
 
-> 🔎 This flow simulates bug detection  
-> 🛠️ Artifacts show issues in `regression` suite
+### ✅ Manual Workflow Trigger
+Run tests on demand via the GitHub UI.
+- Choose between `acceptance`, `smoke`, or `regression`
+- Mocks test results, always green
+- Allure report generated for demo purposes
+
+🔗 `.github/workflows/manual-quality-gate.yml`
 
 ---
 
-## ⚙️ Usage & Setup
+### 🔁 Auto Trigger on `main` Push
+Every push to `main` runs the **@acceptance** tests.
+- Ensures critical flows always stay green
+- Lightweight, stable CI signal
 
-1. Clone the repo
-2. Create `.env` file from `.env.example`
-3. Run locally with:
+🔗 `.github/workflows/on-main-acceptance.yml`
+
+---
+
+### 🌙 Nightly Full Run
+Scheduled to run every day at **01:00 CET**
+- Simulates full regression run with "detected" bugs
+- Mocks failing tests to show potential issues
+- Allure report included
+
+🔗 `.github/workflows/nightly-full-run.yml`
+
+---
+
+## 🛠 Usage Instructions
+
 ```bash
+# Install dependencies
+npm install
+
+# Run Cypress
 npx cypress open
-# or
+
+# Run Playwright
 npx playwright test
+
+# Setup environment variables
+cp .env.example .env
 ```
 
-> No test will fail without env setup — default mocks are used in CI.
-
 ---
 
-## ✍️ Author
+## 🙌 Author
 
-Built by **Yaroslav Oleshchuk** — QA engineer, traveler, and automation enthusiast.  
-Let's break some UIs and ship great products 🚀
+Crafted by **Yaroslav Oleshchuk**  
+Senior QA Engineer | AdTech Specialist | Automation Addict  
+[LinkedIn](https://linkedin.com/in/yaoleshchuk)
+
