@@ -1,0 +1,1 @@
+SELECT conversion_rate FROM currency_rates WHERE currency = 'USD';
