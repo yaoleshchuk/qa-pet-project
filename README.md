@@ -1,47 +1,75 @@
 # QA Pet Project — Real-World Testing Practice
 
-This repository is my QA engineering portfolio, showcasing practical testing skills across multiple domains.
-It includes manual test design, automation, API testing, data validation, and an AI-powered test case reviewer.
+This is a hands-on QA portfolio demonstrating modern testing practices across manual and automated workflows.  
+The project includes Gherkin-based E2E test cases for Booking.com, run using both Playwright and Cypress, with full Page Object support, environment variable handling, and cross-browser automation.
 
 ---
 
-## 🔍 Project Overview
-
-| Module                        | Description |
-|------------------------------|-------------|
-| **01-open-site-tests**       | Manual + automated tests for a real-world public website (e.g. Wikipedia, Trello). |
-| **02-adtech-simulation**     | Simulated AdTech project with mocked API, UI, SQL validation and realistic test cases. |
-| **03-ai-review-bot**         | AI-based bot that reviews test cases in Gherkin format and gives structured feedback. |
-| **04-gherkin-api-sql**       | Clean Gherkin test cases + API tests + SQL validation examples (curl + queries). |
-
----
-
-## 🧪 Tools & Tech
-
-- Manual Testing (Gherkin / Markdown)
-- Cypress / Playwright for UI Automation
-- curl, Postman for API Testing
-- SQL for backend validation
-- GitHub Actions for CI
-- OpenAI / LLM for AI reviewer
-
----
-
-## 🚀 Structure
+## 📦 Project Structure
 
 ```
 qa-pet-project/
-├── 01-open-site-tests/        # Public site testing (UI + manual)
-├── 02-adtech-simulation/      # Mock AdTech testing
-├── 03-ai-review-bot/          # AI reviewer tool
-├── 04-gherkin-api-sql/        # Gherkin + API + SQL examples
-└── .github/workflows/         # CI config
+├── .env.example                  # Template for secrets/config
+├── .env                          # Local config (excluded from Git)
+├── 01-open-site-tests/          # E2E UI tests (manual + automation)
+│   ├── manual-tests/            # Gherkin feature files
+│   ├── ui-tests/
+│   │   ├── playwright/          # TS tests with Cucumber + POM + dotenv
+│   │   └── cypress/             # JS tests with Cucumber + POM + cross-browser
+├── 02-adtech-simulation/        # Mock AdTech test simulation
+├── 03-ai-review-bot/            # AI bot for test review
+├── 04-gherkin-api-sql/          # Gherkin + API + SQL examples
 ```
 
 ---
 
-## 🧑‍💻 Author
+## 🔧 Tech Stack
+
+- Manual Testing: Gherkin
+- UI Automation: Playwright (TypeScript), Cypress (JavaScript)
+- CI Ready: GitHub Actions
+- Page Object Model + modular reusable steps
+- Secure env config via `.env` and `dotenv`
+
+---
+
+## 🔑 Environment Variables
+
+Defined in `.env` (ignored by git), sample in `.env.example`.
+
+```env
+BASE_URL=https://www.booking.com
+BROWSER=chromium
+TEST_USER_EMAIL=testuser@example.com
+TEST_USER_PASSWORD=correct_password
+DEFAULT_CITY=Paris
+DEFAULT_CHECKIN=2025-07-01
+DEFAULT_CHECKOUT=2025-07-05
+DEFAULT_ADULTS=2
+```
+
+---
+
+## 🚀 Quick Start
+
+```bash
+# Install dependencies (in Cypress/Playwright folder)
+npm install
+
+# Copy and edit env file
+cp .env.example .env
+
+# Run Playwright tests
+npx playwright test
+
+# Run Cypress tests
+npx cypress open
+```
+
+---
+
+## 👤 Author
 
 **Yaroslav Oleshchuk**  
-QA Engineer with 7+ years of experience in AdTech, automation, and structured QA process.  
-[LinkedIn](https://linkedin.com/in/yaoleshchuk) • [GitHub](https://github.com/yaoleshchuk)
+QA Engineer | AdTech Expert | Manual + Automation  
+[LinkedIn](https://linkedin.com/in/yaoleshchuk)
