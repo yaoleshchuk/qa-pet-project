@@ -1,3 +1,7 @@
+require('dotenv').config();
+
+require('dotenv').config();
+
 class BookingPage {
   visit() {
     cy.visit('https://www.booking.com');

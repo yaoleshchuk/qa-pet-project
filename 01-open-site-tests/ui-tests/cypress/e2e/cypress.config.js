@@ -1,3 +1,5 @@
+require('dotenv').config();
+require('dotenv').config();
 const { defineConfig } = require('cypress');
 const createBundler = require('@bahmutov/cypress-esbuild-preprocessor');
 const addCucumberPreprocessorPlugin = require('@badeball/cypress-cucumber-preprocessor').addCucumberPreprocessorPlugin;
@@ -5,6 +7,11 @@ const createEsbuildPlugin = require('@badeball/cypress-cucumber-preprocessor/esb
 
 module.exports = defineConfig({
   e2e: {
+    env: {
+      baseUrl: process.env.BASE_URL,
+      testUserEmail: process.env.TEST_USER_EMAIL,
+      testUserPassword: process.env.TEST_USER_PASSWORD,
+    },
     baseUrl: 'https://www.booking.com',
     async setupNodeEvents(on, config) {
       await addCucumberPreprocessorPlugin(on, config);
