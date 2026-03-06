@@ -1,8 +1,8 @@
 
 // --- booking.steps.js ---
 import { Given, When, Then } from '@badeball/cypress-cucumber-preprocessor';
+import BookingPage from '../pages/selectors';
 
-import BookingPage from '../../support/pages/bookingPage';
 const booking = new BookingPage();
 
 Given('I open the Booking.com homepage', () => {
@@ -29,7 +29,8 @@ Then('I should be redirected to the user dashboard', () => {
 
 // --- currency_switch.steps.js ---
 import { Given, When, Then } from '@badeball/cypress-cucumber-preprocessor';
-import BookingPage from '../../support/pages/bookingPage';
+import BookingPage from '../pages/selectors';
+
 const booking = new BookingPage();
 
 Given('I open the Booking.com homepage', () => {
@@ -48,7 +49,7 @@ Then('prices should be displayed in {string}', (symbol) => {
 import { Given, When, Then } from '@badeball/cypress-cucumber-preprocessor';
 
 Given('I am on the contact page', () => {
-  cy.visit('/contact'); // Replace with actual URL if exists
+  cy.visit('/contact');
 });
 
 When('I click the submit button without filling any field', () => {
@@ -61,7 +62,8 @@ Then('I should see validation errors for required fields', () => {
 
 // --- invalid_login.steps.js ---
 import { Given, When, Then } from '@badeball/cypress-cucumber-preprocessor';
-import BookingPage from '../../support/pages/bookingPage';
+import BookingPage from '../pages/selectors';
+
 const booking = new BookingPage();
 
 Given('I open the Booking.com homepage', () => {
@@ -88,7 +90,8 @@ Then('I should see an error message', () => {
 
 // --- language_switch.steps.js ---
 import { Given, When, Then } from '@badeball/cypress-cucumber-preprocessor';
-import BookingPage from '../../support/pages/bookingPage';
+import BookingPage from '../pages/selectors';
+
 const booking = new BookingPage();
 
 Given('I open the Booking.com homepage', () => {
@@ -105,7 +108,8 @@ Then('the site should display text {string}', (text) => {
 
 // --- search_filters.steps.js ---
 import { Given, When, Then } from '@badeball/cypress-cucumber-preprocessor';
-import BookingPage from '../../support/pages/bookingPage';
+import BookingPage from '../pages/selectors';
+
 const booking = new BookingPage();
 
 Given('I have searched for hotels in {string} from {string} to {string}', (city, checkin, checkout) => {

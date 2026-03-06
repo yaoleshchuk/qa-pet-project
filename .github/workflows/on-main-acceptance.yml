@@ -12,27 +12,27 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
 
       - name: Install dependencies
-        run: |
-          echo "Installing packages (mocked)"
-          sleep 2
+        run: npm install
 
-      - name: Run acceptance tests
-        run: |
-          echo "::group::Running @acceptance tests"
-          echo "All tests passed ✅"
-          echo "::endgroup::"
+      - name: Install Playwright browsers
+        run: npx playwright install chromium --with-deps
 
-      - name: Generate Allure Report (mock)
-        run: |
-          mkdir -p allure-results
-          echo "Acceptance tests passed at $(date)" > allure-results/report.txt
-        continue-on-error: true
+      - name: Validate @Acceptance test suite (dry-run)
+        run: npx cucumber-js --profile acceptance --dry-run
 
-      - name: Upload Allure report
+      - name: Upload test report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: allure-report-acceptance-main
-          path: allure-results
+          name: acceptance-report-main
+          path: reports/
+          if-no-files-found: ignore

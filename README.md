@@ -1,85 +1,133 @@
 # QA Pet Project
 
-This project showcases a complete E2E QA setup using **Gherkin**, **Cypress**, **Playwright**, and **GitHub Actions**, focused on the popular website **Booking.com**
+A complete QA automation showcase using **Gherkin BDD**, **Cypress**, **Playwright**, and **GitHub Actions**, focused on [Booking.com](https://booking.com).
 
 ---
 
-## ✅ Main Module: `booking - tests - example`
+## Tech Stack
 
-End-to-end tests for [Booking.com](https://booking.com) using **Gherkin** syntax and modern automation tools.
+| Tool | Purpose |
+|------|---------|
+| **Gherkin / Cucumber** | BDD feature files — single source of truth for all test scenarios |
+| **Cypress** | E2E and API tests (JavaScript) |
+| **Playwright** | E2E and API tests (TypeScript) |
+| **GitHub Actions** | CI/CD quality gates |
 
-### ✍ Manual Tests
-- All written in **Gherkin** syntax: Scenario, Background, Scenario Outline with parameters
-- Tests organized by **test suite** (Acceptance / Smoke / Regression)
-- Each test has **priority** (High / Medium / Low) and **ID**
-- Covers both `e2e` and `API` flows
-- Stored under `/tests/manual/`
+---
 
-### ⚙️ Automation Support
+## Project Structure
 
-| Tool        | Description                                 |
-|-------------|---------------------------------------------|
-| **Cypress** | Cross-browser UI tests with reusable steps and selectors |
-| **Playwright** | PageObject-based UI tests + API support + `.env` |
-| `.env`      | All test data, credentials, and config       |
-
-📦 Automation structure:
 ```
-/tests/
-├── manual/                 # Single source of truth for Gherkin features
-├── automation/
-│   ├── e2e/
-│   │   ├── cypress/        # Cypress UI automation
-│   │   │   ├── steps/
-│   │   │   ├── pages/
-│   │   ├── playwright/     # Playwright UI + API automation
-│   │   │   ├── steps/
-│   │   │   ├── pages/
-│   │   │   ├── utils.ts
-│   ├── api/                # API automation
+booking - tests - example/
+├── manual/features/
+│   ├── api/             # 10 API feature files
+│   └── e2e/             # 6 UI feature files
+└── automation/
+    ├── api/
+    │   ├── cypress/     # Cypress API step definitions
+    │   ├── playwright/  # Playwright API step definitions
+    │   ├── curl/        # cURL API scripts (bash)
+    │   └── sql/         # SQL query examples
+    └── e2e/
+        ├── cypress/     # Page Objects + step definitions (JS)
+        ├── playwright/  # Page Objects + step definitions (TS)
+        └── fixtures/    # Playwright world (browser setup/teardown)
 ```
 
 ---
 
-## 🔐 `.env` usage
+## Getting Started
 
-Environment variables are stored in `.env` (excluded from Git).
+### Prerequisites
 
-Example:
+- Node.js >= 20
+- npm >= 9
+
+### Setup
+
+```bash
+git clone https://github.com/yaoleshchuk/qa-pet-project.git
+cd qa-pet-project
+npm install
+npx playwright install chromium --with-deps
+```
+
+### Configure environment
+
+```bash
+cp "booking - tests - example/automation/e2e/.env.example" .env
+```
+
+Edit `.env`:
+
 ```env
-BASE_URL=https://booking.com
-TEST_EMAIL=test@example.com
-TEST_PASSWORD=12345678
+BASE_URL=https://www.booking.com
+API_URL=https://www.booking.com
+TEST_USER_EMAIL=your@email.com
+TEST_USER_PASSWORD=yourpassword
+DEFAULT_CITY=London
+DEFAULT_CHECKIN=2025-06-01
+DEFAULT_CHECKOUT=2025-06-05
+DEFAULT_ADULTS=2
 ```
 
-Used inside Playwright and Cypress to avoid hardcoded secrets.
+---
+
+## Running Tests
+
+### Playwright + Cucumber
+
+```bash
+# Validate test suite structure (dry-run, no browser needed)
+npm run test:pw:dry-run
+
+# Run by suite
+npm run test:pw:acceptance
+npm run test:pw:smoke
+npm run test:pw:regression
+```
+
+### Cypress
+
+```bash
+# Open interactive runner
+npm run test:cypress:open
+
+# Run headless
+npm run test:cypress:run
+npm run test:cypress:acceptance
+npm run test:cypress:smoke
+```
 
 ---
 
-## 🧪 Quality Gates (GitHub Actions)
+## Test Suites
 
-CI/CD setup simulates a professional QA workflow:
-
-### ✅ Manual Trigger:
-Run **any test suite** (Acceptance / Smoke / Regression) via workflow dispatch
-
-### 🔁 On Merge to `main`:
-Auto-run **Acceptance** tests
-
-### 🕐 Daily Scheduled Run:
-Auto-run **all tests** (Acceptance + Smoke + Regression) at 01:00 CET
-
-🎯 Allure reports integrated. Acceptance tests are mocked to always pass. Full runs catch simulated failures.
+| Suite | Tag | Priority | Description |
+|-------|-----|----------|-------------|
+| Acceptance | `@Acceptance` | High | Core happy paths — run on every merge |
+| Smoke | `@Smoke` | Medium | Key flows — run daily |
+| Regression | `@Regression` | Low | Full coverage — run nightly |
 
 ---
 
-## 🚀 Coming Soon
+## CI/CD (GitHub Actions)
 
-- Full mock AdTech app for simulation
-- Test case review bot powered by AI
-- SQL & curl-based API checks with coverage
+| Workflow | Trigger | Runs |
+|----------|---------|------|
+| `on-main-acceptance.yml` | Push to `main` | `@Acceptance` suite |
+| `manual-quality-gate.yml` | Manual dispatch | Any suite (selectable) |
+| `nightly-full-run.yml` | Daily 01:00 CET | All suites sequentially |
 
 ---
 
-Built with ♥ by Yaroslav Oleshchuk
-[LinkedIn](https://linkedin.com/in/yaoleshchuk)
+## Coverage
+
+- **E2E**: Login, hotel search, filters, sorting, currency/language switch, wishlist
+- **API**: Auth, search by city/dates/price, currency, wishlist CRUD, hotel details, reviews
+- **SQL**: DB-level query examples for test data validation
+- **cURL**: Raw HTTP scripts for lightweight API checks
+
+---
+
+Built with love by Yaroslav Oleshchuk — [LinkedIn](https://linkedin.com/in/yaoleshchuk)

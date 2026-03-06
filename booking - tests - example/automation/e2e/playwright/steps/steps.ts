@@ -1,12 +1,8 @@
 
 // --- booking.steps.ts ---
-import dotenv from 'dotenv';
-dotenv.config();
-import dotenv from 'dotenv';
-dotenv.config();
 import { Given, When, Then } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
-import { BookingPage } from '../pages/bookingPage';
+import { BookingPage } from '../pages/selectors';
 import { page } from '../../fixtures/world';
 
 const booking = new BookingPage(page);
@@ -76,10 +72,8 @@ Then(/^the hotel should be added to my favorites$/, async () => {
 // --- currency_switch.steps.ts ---
 import { Given, When, Then } from '@cucumber/cucumber';
 import { page } from '../../fixtures/world';
-import { BookingPage } from '../pages/bookingPage';
-import dotenv from 'dotenv';
+import { BookingPage } from '../pages/selectors';
 
-dotenv.config();
 const booking = new BookingPage(page);
 
 Given('I open the Booking.com homepage', async () => {
@@ -97,9 +91,6 @@ Then('prices should be displayed in {string}', async (symbol: string) => {
 // --- form_validation.steps.ts ---
 import { Given, When, Then } from '@cucumber/cucumber';
 import { page } from '../../fixtures/world';
-import dotenv from 'dotenv';
-
-dotenv.config();
 
 Given('I am on the contact page', async () => {
   await page.goto('https://www.booking.com/contact');
@@ -117,10 +108,8 @@ Then('I should see validation errors for required fields', async () => {
 import { Given, When, Then } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
 import { page } from '../../fixtures/world';
-import { BookingPage } from '../pages/bookingPage';
-import dotenv from 'dotenv';
+import { BookingPage } from '../pages/selectors';
 
-dotenv.config();
 const booking = new BookingPage(page);
 
 Given('I open the Booking.com homepage', async () => {
@@ -148,10 +137,8 @@ Then('I should see an error message', async () => {
 // --- language_switch.steps.ts ---
 import { Given, When, Then } from '@cucumber/cucumber';
 import { page } from '../../fixtures/world';
-import { BookingPage } from '../pages/bookingPage';
-import dotenv from 'dotenv';
+import { BookingPage } from '../pages/selectors';
 
-dotenv.config();
 const booking = new BookingPage(page);
 
 Given('I open the Booking.com homepage', async () => {
@@ -169,10 +156,8 @@ Then('the site should display text {string}', async (text: string) => {
 // --- search_filters.steps.ts ---
 import { Given, When, Then } from '@cucumber/cucumber';
 import { page } from '../../fixtures/world';
-import { BookingPage } from '../pages/bookingPage';
-import dotenv from 'dotenv';
+import { BookingPage } from '../pages/selectors';
 
-dotenv.config();
 const booking = new BookingPage(page);
 
 Given('I have searched for hotels in {string} from {string} to {string}', async (city: string, checkin: string, checkout: string) => {
