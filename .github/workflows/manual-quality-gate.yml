@@ -20,28 +20,27 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
 
       - name: Install dependencies
-        run: |
-          echo "Installing npm packages (mocked)"
-          sleep 2
+        run: npm install
 
-      - name: Run ${{ github.event.inputs.tag }} tests
-        run: |
-          echo "Running tests for tag: ${{ github.event.inputs.tag }}"
-          echo "::group::Mock Test Output"
-          echo "All tests passed ✅"
-          echo "::endgroup::"
+      - name: Install Playwright browsers
+        run: npx playwright install chromium --with-deps
 
-      - name: Upload Allure report (mock)
-        run: |
-          mkdir -p allure-results
-          echo "Mock Allure Report for ${{ github.event.inputs.tag }}" > allure-results/mock.txt
-        continue-on-error: true
+      - name: Validate ${{ github.event.inputs.tag }} test suite (dry-run)
+        run: npx cucumber-js --profile ${{ github.event.inputs.tag }} --dry-run
 
-      - name: Archive Allure report
+      - name: Upload test report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: allure-report-${{ github.event.inputs.tag }}
-          path: allure-results
+          name: report-${{ github.event.inputs.tag }}
+          path: reports/
+          if-no-files-found: ignore
