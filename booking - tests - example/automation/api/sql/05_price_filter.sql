@@ -1,1 +1,0 @@
-SELECT * FROM hotels WHERE city = 'Paris' AND price BETWEEN 100 AND 300;

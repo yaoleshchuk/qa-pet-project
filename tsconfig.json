@@ -12,7 +12,7 @@
     "baseUrl": "."
   },
   "include": [
-    "booking - tests - example/automation/**/*.ts"
+    "tests/automation/**/*.ts"
   ],
   "exclude": [
     "node_modules",

@@ -1,1 +1,0 @@
-SELECT * FROM wishlist WHERE user_id = 1 AND hotel_id = 123;

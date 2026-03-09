@@ -1,1 +1,0 @@
-SELECT * FROM hotels WHERE city = 'Paris';
