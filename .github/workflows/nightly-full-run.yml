@@ -14,7 +14,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
       - run: npm install
       - run: npx playwright install chromium --with-deps
       - name: Run @Acceptance (dry-run)
@@ -35,7 +34,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
       - run: npm install
       - run: npx playwright install chromium --with-deps
       - name: Run @Smoke (dry-run)
@@ -56,7 +54,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
       - run: npm install
       - run: npx playwright install chromium --with-deps
       - name: Run @Regression (dry-run)
