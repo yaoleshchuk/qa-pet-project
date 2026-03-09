@@ -7,10 +7,6 @@ const booking = new BookingPage(page);
 
 // ─── Navigation ───────────────────────────────────────────────────────────────
 
-Given(/^I open the Booking\.com homepage$/, async () => {
-  await booking.gotoHomePage();
-});
-
 Given('I open the Booking.com homepage', async () => {
   await booking.gotoHomePage();
 });
@@ -32,25 +28,13 @@ Given('I have searched for hotels in {string} from {string} to {string}', async 
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 
-When(/^I click on the "Sign in" button$/, async () => {
-  await booking.clickSignIn();
-});
-
 When('I click on the {string} button', async (label: string) => {
   await booking.clickButton(label);
-});
-
-When(/^I enter email "([^"]+)" and click "Continue"$/, async (email: string) => {
-  await booking.enterEmail(email);
 });
 
 When('I enter email {string} and click {string}', async (email: string, btn: string) => {
   await booking.enterEmail(email);
   await booking.clickButton(btn);
-});
-
-When(/^I enter password "([^"]+)" and click "Sign in"$/, async (password: string) => {
-  await booking.enterPassword(password);
 });
 
 When('I enter password {string} and click {string}', async (password: string, btn: string) => {
