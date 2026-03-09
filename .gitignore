@@ -1,38 +1,39 @@
-# macOS
-.DS_Store
-
-# Node
+# Dependencies
 node_modules/
-dist/
-*.log
+
+# Environment variables
+.env
+.env.local
+
+# Test reports & artifacts
+reports/
+test-results/
+coverage/
+.nyc_output/
+
+# Playwright
+playwright-report/
+playwright/.cache/
 
 # Cypress
 cypress/videos/
 cypress/screenshots/
-cypress/results/
 cypress/downloads/
 
-# Playwright
-test-results/
-playwright-report/
-trace.zip
+# Build output
+dist/
+build/
 
-# Env & config
-.env
-.env.local
-
-# System
-*.zip
-*.tar
-*.gz
-*.rar
-
-# IDEs & editors
-.idea/
+# OS & IDE
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
 .vscode/
-*.iml
+.idea/
+*.swp
+*.swo
 
-# Reports
-allure-report/
-*.html
-coverage/
+# Logs
+*.log
+npm-debug.log*
