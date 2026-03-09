@@ -1,5 +1,3 @@
-
-// --- bookingPage.ts ---
 import { Page } from '@playwright/test';
 
 export class BookingPage {
@@ -12,6 +10,7 @@ export class BookingPage {
   get emailInput() { return this.page.getByPlaceholder('Enter your email address'); }
   get passwordInput() { return this.page.getByPlaceholder('Enter your password'); }
   get wishlistButton() { return this.page.locator('[data-testid="wishlist-button"]'); }
+  get sortDropdown() { return this.page.locator('[data-testid="sorters-dropdown-trigger"]'); }
 
   // Navigation
   async gotoHomePage() {
@@ -19,6 +18,10 @@ export class BookingPage {
   }
 
   // Auth
+  async clickSignIn() {
+    await this.signInButton.click();
+  }
+
   async clickButton(label: string) {
     await this.page.getByRole('button', { name: new RegExp(label, 'i') }).click();
   }
@@ -35,14 +38,18 @@ export class BookingPage {
   async search(city: string, checkin: string, checkout: string, adults: string) {
     await this.searchInput.fill(city);
     await this.page.getByRole('button', { name: /search/i }).click();
-    // Dates and adults are placeholder logic here
   }
 
   async applyFilter(filterName: string) {
     await this.page.getByText(filterName, { exact: false }).click();
   }
 
-  // Language/Currency
+  async sortBy(option: string) {
+    await this.sortDropdown.click();
+    await this.page.getByText(option, { exact: false }).click();
+  }
+
+  // Language / Currency
   async selectLanguage(language: string) {
     await this.page.getByTestId('header-language-picker-trigger').click();
     await this.page.getByText(language, { exact: false }).click();
