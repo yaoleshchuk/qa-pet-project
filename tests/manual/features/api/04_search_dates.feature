@@ -8,5 +8,5 @@ Feature: Hotel search with check-in/check-out
 
     Examples:
       | city      | checkin     | checkout    |
-      | Paris     | 2025-07-01  | 2025-07-05  |
-      | Rome      | 2025-08-10  | 2025-08-15  |
+      | Paris     | 2026-07-01  | 2026-07-05  |
+      | Rome      | 2026-08-10  | 2026-08-15  |

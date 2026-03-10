@@ -30,8 +30,6 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Install Playwright browsers
-        run: npx playwright install chromium --with-deps
 
       - name: Validate ${{ github.event.inputs.tag }} test suite (dry-run)
         run: npx cucumber-js --profile ${{ github.event.inputs.tag }} --dry-run

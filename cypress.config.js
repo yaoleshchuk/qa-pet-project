@@ -7,7 +7,7 @@ require('dotenv').config();
 module.exports = defineConfig({
   e2e: {
     baseUrl: process.env.BASE_URL || 'https://www.booking.com',
-    specPattern: 'booking - tests - example/manual/features/**/*.feature',
+    specPattern: 'tests/manual/features/**/*.feature',
     supportFile: false,
     viewportWidth: 1280,
     viewportHeight: 800,
@@ -28,8 +28,8 @@ module.exports = defineConfig({
   env: {
     API_URL: process.env.API_URL || 'https://www.booking.com',
     stepDefinitions: [
-      'booking - tests - example/automation/e2e/cypress/steps/*.js',
-      'booking - tests - example/automation/api/cypress/api.steps.js',
+      'tests/automation/e2e/cypress/steps/*.js',
+      'tests/automation/api/cypress/api.steps.js',
     ],
   },
 });
