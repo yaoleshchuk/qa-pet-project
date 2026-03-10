@@ -10,8 +10,8 @@ WITH overlapping_bookings AS (
   SELECT DISTINCT hotel_id
   FROM bookings
   WHERE status        = 'confirmed'
-    AND checkin_date  < '2025-07-05'   -- checkout requested
-    AND checkout_date > '2025-07-01'   -- checkin requested
+    AND checkin_date  < '2026-07-05'   -- checkout requested
+    AND checkout_date > '2026-07-01'   -- checkin requested
 ),
 available_hotels AS (
   SELECT

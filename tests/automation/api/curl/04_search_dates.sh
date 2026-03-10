@@ -8,8 +8,8 @@ set -euo pipefail
 
 BASE_URL="${BASE_URL:-https://api.booking.com}"
 CITY="${1:-Paris}"
-CHECKIN="${2:-2025-07-01}"
-CHECKOUT="${3:-2025-07-05}"
+CHECKIN="${2:-2026-07-01}"
+CHECKOUT="${3:-2026-07-05}"
 
 echo "▶ GET ${BASE_URL}/api/hotels?city=${CITY}&checkin=${CHECKIN}&checkout=${CHECKOUT}"
 

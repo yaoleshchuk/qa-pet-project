@@ -40,7 +40,7 @@ tests/
 │       │   ├── 09_view_details.feature
 │       │   ├── 10_get_reviews.feature
 │       │   └── 11_hotel_review_crud.feature   ← Full CRUD lifecycle
-│       └── e2e/                     # 7 UI feature files
+│       └── e2e/                     # 10 UI feature files
 │           ├── booking.feature
 │           ├── language_switch.feature
 │           ├── currency_switch.feature
@@ -210,12 +210,59 @@ for f in tests/automation/api/curl/*.sh; do bash "$f" && echo; done
 |----------|---------|------|
 | [`on-main-acceptance.yml`](.github/workflows/on-main-acceptance.yml) | Push to `main` | `@Acceptance` dry-run |
 | [`manual-quality-gate.yml`](.github/workflows/manual-quality-gate.yml) | Manual dispatch | Selectable suite (acceptance / smoke / regression) |
-| [`nightly-full-run.yml`](.github/workflows/nightly-full-run.yml) | Daily 01:00 CET | All three suites sequentially (dry-run) |
-| [`api-mock-tests.yml`](.github/workflows/api-mock-tests.yml) | Daily 01:30 CET + manual | Real API tests against mock server → Allure report → GitHub Pages |
+| [`nightly-full-run.yml`](.github/workflows/nightly-full-run.yml) | Daily 00:00 UTC | All three suites sequentially (dry-run) |
+| [`api-mock-tests.yml`](.github/workflows/api-mock-tests.yml) | Push to `main`, daily 01:30 UTC, manual dispatch | Real API tests against mock server → Allure report → GitHub Pages |
 
 The dry-run workflows validate step matching without a browser or live API. The mock-server workflow runs tests for real — against an Express mock server — and publishes an Allure HTML report to GitHub Pages.
 
 > **To enable GitHub Pages**: go to *Settings → Pages → Source* and set it to **GitHub Actions**.
+
+---
+
+## Allure Reports
+
+API tests produce a full **Allure HTML report** automatically on every CI run.
+
+### Live report
+
+> 📊 **[View latest Allure report →](https://yaoleshchuk.github.io/qa-pet-project/)**
+
+The report is published to **GitHub Pages** after every push to `main` and every
+nightly run via the [`api-mock-tests.yml`](.github/workflows/api-mock-tests.yml)
+workflow. It includes:
+
+- ✅ Pass / ❌ Fail / ⚠️ Broken status per test
+- Full step-by-step execution log for each scenario
+- Tags, feature grouping, and suite breakdown
+- Duration timeline and statistics
+
+### How it works
+
+```
+Mock server starts (Express, port 3001)
+        ↓
+Cucumber runs API tests against mock server
+        ↓
+allure-cucumberjs writes results to allure-results/
+        ↓
+allure generate → allure-report/ (HTML)
+        ↓
+GitHub Pages deploys report → live URL
+```
+
+### Run locally
+
+```bash
+# Terminal 1 — start mock server
+npm run mock:start
+
+# Terminal 2 — run tests and generate report
+npm run test:api:acceptance
+npm run test:api:smoke
+npm run test:api:regression
+npm run allure:generate
+npm run allure:open        # opens browser automatically
+```
 
 ---
 

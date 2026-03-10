@@ -15,7 +15,6 @@ jobs:
         with:
           node-version: '20'
       - run: npm install
-      - run: npx playwright install chromium --with-deps
       - name: Run @Acceptance (dry-run)
         run: npx cucumber-js --profile acceptance --dry-run
       - uses: actions/upload-artifact@v4
@@ -35,7 +34,6 @@ jobs:
         with:
           node-version: '20'
       - run: npm install
-      - run: npx playwright install chromium --with-deps
       - name: Run @Smoke (dry-run)
         run: npx cucumber-js --profile smoke --dry-run
       - uses: actions/upload-artifact@v4
@@ -55,7 +53,6 @@ jobs:
         with:
           node-version: '20'
       - run: npm install
-      - run: npx playwright install chromium --with-deps
       - name: Run @Regression (dry-run)
         run: npx cucumber-js --profile regression --dry-run
       - uses: actions/upload-artifact@v4
