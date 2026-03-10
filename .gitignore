@@ -11,6 +11,10 @@ test-results/
 coverage/
 .nyc_output/
 
+# Allure
+allure-results/
+allure-report/
+
 # Playwright
 playwright-report/
 playwright/.cache/

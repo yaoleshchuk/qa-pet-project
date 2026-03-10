@@ -3,6 +3,7 @@
 [![Acceptance Tests](https://github.com/yaoleshchuk/qa-pet-project/actions/workflows/on-main-acceptance.yml/badge.svg)](https://github.com/yaoleshchuk/qa-pet-project/actions/workflows/on-main-acceptance.yml)
 [![Nightly Full Run](https://github.com/yaoleshchuk/qa-pet-project/actions/workflows/nightly-full-run.yml/badge.svg)](https://github.com/yaoleshchuk/qa-pet-project/actions/workflows/nightly-full-run.yml)
 [![Manual Quality Gate](https://github.com/yaoleshchuk/qa-pet-project/actions/workflows/manual-quality-gate.yml/badge.svg)](https://github.com/yaoleshchuk/qa-pet-project/actions/workflows/manual-quality-gate.yml)
+[![API Mock Tests](https://github.com/yaoleshchuk/qa-pet-project/actions/workflows/api-mock-tests.yml/badge.svg)](https://github.com/yaoleshchuk/qa-pet-project/actions/workflows/api-mock-tests.yml)
 
 A complete **QA automation portfolio** built on [Booking.com](https://booking.com) using industry-standard practices: Gherkin BDD, Playwright (TypeScript), Cypress (JavaScript), and GitHub Actions CI/CD.
 
@@ -148,17 +149,36 @@ TEST_USER_PASSWORD=yourpassword
 
 ## Running Tests
 
-### Playwright + Cucumber
+### Playwright + Cucumber (dry-run — step validation)
 
 ```bash
 # Validate suite structure without a browser (fast, used in CI)
 npm run test:pw:dry-run
 
-# Run by suite
+# Run by suite (dry-run)
 npm run test:pw:acceptance
 npm run test:pw:smoke
 npm run test:pw:regression
 ```
+
+### API Tests against Mock Server (real execution + Allure)
+
+```bash
+# 1. Start the mock API server (Express, port 3001)
+npm run mock:start
+
+# 2. In a separate terminal — run tests by suite
+npm run test:api:acceptance   # @API + @Acceptance
+npm run test:api:smoke        # @API + @Smoke
+npm run test:api:regression   # @API + @Regression
+
+# 3. Generate & open the Allure HTML report
+npm run allure:generate
+npm run allure:open
+```
+
+> The mock server simulates all Booking.com API endpoints with realistic seed
+> data, enabling fully deterministic test results without network access.
 
 ### Cypress
 
@@ -190,9 +210,12 @@ for f in tests/automation/api/curl/*.sh; do bash "$f" && echo; done
 |----------|---------|------|
 | [`on-main-acceptance.yml`](.github/workflows/on-main-acceptance.yml) | Push to `main` | `@Acceptance` dry-run |
 | [`manual-quality-gate.yml`](.github/workflows/manual-quality-gate.yml) | Manual dispatch | Selectable suite (acceptance / smoke / regression) |
-| [`nightly-full-run.yml`](.github/workflows/nightly-full-run.yml) | Daily 01:00 CET | All three suites sequentially (Acceptance → Smoke → Regression) |
+| [`nightly-full-run.yml`](.github/workflows/nightly-full-run.yml) | Daily 01:00 CET | All three suites sequentially (dry-run) |
+| [`api-mock-tests.yml`](.github/workflows/api-mock-tests.yml) | Daily 01:30 CET + manual | Real API tests against mock server → Allure report → GitHub Pages |
 
-All CI jobs use `--dry-run` mode to validate that every Gherkin step has a matching automation definition — no browser or live API required.
+The dry-run workflows validate step matching without a browser or live API. The mock-server workflow runs tests for real — against an Express mock server — and publishes an Allure HTML report to GitHub Pages.
+
+> **To enable GitHub Pages**: go to *Settings → Pages → Source* and set it to **GitHub Actions**.
 
 ---
 

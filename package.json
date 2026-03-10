@@ -4,22 +4,39 @@
   "description": "QA automation showcase: Cypress + Playwright + Gherkin BDD + GitHub Actions",
   "private": true,
   "scripts": {
+    "mock:start": "node mock-server/server.js",
+
     "test:pw:dry-run": "cucumber-js --profile default --dry-run",
-    "test:pw:acceptance": "cucumber-js --profile acceptance",
-    "test:pw:smoke": "cucumber-js --profile smoke",
-    "test:pw:regression": "cucumber-js --profile regression",
+    "test:pw:acceptance": "cucumber-js --profile acceptance --dry-run",
+    "test:pw:smoke": "cucumber-js --profile smoke --dry-run",
+    "test:pw:regression": "cucumber-js --profile regression --dry-run",
+
+    "test:api:acceptance": "API_URL=http://localhost:3001 cucumber-js --profile api-acceptance",
+    "test:api:smoke": "API_URL=http://localhost:3001 cucumber-js --profile api-smoke",
+    "test:api:regression": "API_URL=http://localhost:3001 cucumber-js --profile api-regression",
+
     "test:cypress:open": "cypress open",
     "test:cypress:run": "cypress run",
     "test:cypress:acceptance": "cypress run --env tags=@Acceptance",
     "test:cypress:smoke": "cypress run --env tags=@Smoke",
-    "test:cypress:regression": "cypress run --env tags=@Regression"
+    "test:cypress:regression": "cypress run --env tags=@Regression",
+
+    "allure:generate": "allure generate allure-results --clean -o allure-report",
+    "allure:open": "allure open allure-report",
+    "allure:serve": "allure serve allure-results"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
   },
   "devDependencies": {
     "@badeball/cypress-cucumber-preprocessor": "^20.1.1",
     "@bahmutov/cypress-esbuild-preprocessor": "^2.2.1",
     "@cucumber/cucumber": "^10.8.0",
     "@playwright/test": "^1.44.0",
+    "@types/express": "^4.17.21",
     "@types/node": "^20.12.0",
+    "allure-commandline": "^2.33.0",
+    "allure-cucumberjs": "^3.0.4",
     "cypress": "^13.10.0",
     "dotenv": "^16.4.5",
     "ts-node": "^10.9.2",
