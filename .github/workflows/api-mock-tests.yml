@@ -1,0 +1,150 @@
+name: API Tests — Mock Server + Allure Report
+
+# Runs real Cucumber API scenarios against the local Express mock server,
+# generates an Allure HTML report, and publishes it to GitHub Pages.
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '30 1 * * *'   # Daily 01:30 UTC (after the nightly dry-run)
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: 'Which API suite to run?'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - acceptance
+          - smoke
+          - regression
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Only one deployment at a time
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  api-tests:
+    name: API Tests (mock server)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      # ── Mock server ────────────────────────────────────────────────────────
+      - name: Start mock API server
+        run: node mock-server/server.js &
+
+      - name: Wait for mock server to be ready
+        run: |
+          for i in $(seq 1 10); do
+            curl -sf http://localhost:3001/health && echo " Server ready" && break
+            echo "Waiting... ($i)"
+            sleep 1
+          done
+
+      # ── Run tests ──────────────────────────────────────────────────────────
+      - name: Run API Acceptance tests
+        if: ${{ github.event.inputs.suite == 'all' || github.event.inputs.suite == 'acceptance' || github.event_name != 'workflow_dispatch' }}
+        run: API_URL=http://localhost:3001 npx cucumber-js --profile api-acceptance
+        continue-on-error: true
+
+      - name: Run API Smoke tests
+        if: ${{ github.event.inputs.suite == 'all' || github.event.inputs.suite == 'smoke' || github.event_name != 'workflow_dispatch' }}
+        run: API_URL=http://localhost:3001 npx cucumber-js --profile api-smoke
+        continue-on-error: true
+
+      - name: Run API Regression tests
+        if: ${{ github.event.inputs.suite == 'all' || github.event.inputs.suite == 'regression' || github.event_name != 'workflow_dispatch' }}
+        run: API_URL=http://localhost:3001 npx cucumber-js --profile api-regression
+        continue-on-error: true
+
+      # ── Allure report ──────────────────────────────────────────────────────
+      - name: Generate Allure HTML report
+        if: always()
+        run: npm run allure:generate
+
+      - name: Upload Allure results (raw)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results-${{ github.run_number }}
+          path: allure-results/
+          if-no-files-found: warn
+
+      - name: Upload Allure HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report-${{ github.run_number }}
+          path: allure-report/
+          if-no-files-found: warn
+
+      # ── Job Summary with report link ───────────────────────────────────────
+      - name: Write job summary
+        if: always()
+        run: |
+          PAGES_URL="https://yaoleshchuk.github.io/qa-pet-project"
+          echo "### API Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Latest report:**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- :test_tube: [See latest report](${PAGES_URL}/)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Allure summary:**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ -f allure-report/widgets/summary.json ]; then
+            TOTAL=$(cat allure-report/widgets/summary.json | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['statistic']['total'])")
+            PASSED=$(cat allure-report/widgets/summary.json | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['statistic']['passed'])")
+            FAILED=$(cat allure-report/widgets/summary.json | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['statistic']['failed'])")
+            BROKEN=$(cat allure-report/widgets/summary.json | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['statistic']['broken'])")
+            echo "| Status | Count |" >> $GITHUB_STEP_SUMMARY
+            echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+            echo "| :white_check_mark: Passed | ${PASSED} |" >> $GITHUB_STEP_SUMMARY
+            echo "| :x: Failed | ${FAILED} |" >> $GITHUB_STEP_SUMMARY
+            echo "| :warning: Broken | ${BROKEN} |" >> $GITHUB_STEP_SUMMARY
+            echo "| **Total** | **${TOTAL}** |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "> No allure summary available" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      # ── GitHub Pages deployment ────────────────────────────────────────────
+      - name: Upload report to GitHub Pages artifact store
+        if: always()
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: allure-report/
+
+  deploy-pages:
+    name: Publish Allure report to GitHub Pages
+    needs: api-tests
+    runs-on: ubuntu-latest
+    if: always()
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
