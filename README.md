@@ -25,10 +25,13 @@ A complete **QA automation portfolio** built on [Booking.com](https://booking.co
 ## Project Structure
 
 ```
+scripts/
+└── ai-generate-feature.ts           # AI feature generator (Claude API)
+
 tests/
 ├── manual/
 │   └── features/
-│       ├── api/                     # 11 API feature files
+│       ├── api/                     # 11 API feature files + AI-generated
 │       │   ├── 01_login_success.feature
 │       │   ├── 02_login_failure.feature
 │       │   ├── 03_search_city.feature
@@ -39,8 +42,9 @@ tests/
 │       │   ├── 08_remove_from_wishlist.feature
 │       │   ├── 09_view_details.feature
 │       │   ├── 10_get_reviews.feature
-│       │   └── 11_hotel_review_crud.feature   ← Full CRUD lifecycle
-│       └── e2e/                     # 10 UI feature files
+│       │   ├── 11_hotel_review_crud.feature   ← Full CRUD lifecycle
+│       │   └── ai_reviews_ep.feature          ← 🤖 AI-generated (EP)
+│       └── e2e/                     # 10 UI feature files + AI-generated
 │           ├── booking.feature
 │           ├── language_switch.feature
 │           ├── currency_switch.feature
@@ -50,7 +54,10 @@ tests/
 │           ├── bva_search_boundaries.feature  ← Boundary Value Analysis
 │           ├── ep_login_credentials.feature   ← Equivalence Partitioning
 │           ├── decision_table_search_filters.feature ← Decision Table
-│           └── state_transition_booking_flow.feature ← State Transition
+│           ├── state_transition_booking_flow.feature ← State Transition
+│           ├── ai_price_filter_currency_switch.feature ← 🤖 AI-generated (Decision Table)
+│           ├── ai_wishlist_state_transition.feature    ← 🤖 AI-generated (State Transition)
+│           └── ai_guest_count_bva.feature              ← 🤖 AI-generated (BVA)
 └── automation/
     ├── api/
     │   ├── playwright/              # Playwright API step definitions (TS)
