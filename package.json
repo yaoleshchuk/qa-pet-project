@@ -5,30 +5,30 @@
   "private": true,
   "scripts": {
     "mock:start": "node mock-server/server.js",
-
     "test:pw:dry-run": "cucumber-js --profile default --dry-run",
     "test:pw:acceptance": "cucumber-js --profile acceptance --dry-run",
     "test:pw:smoke": "cucumber-js --profile smoke --dry-run",
     "test:pw:regression": "cucumber-js --profile regression --dry-run",
-
     "test:api:acceptance": "API_URL=http://localhost:3001 cucumber-js --profile api-acceptance",
     "test:api:smoke": "API_URL=http://localhost:3001 cucumber-js --profile api-smoke",
     "test:api:regression": "API_URL=http://localhost:3001 cucumber-js --profile api-regression",
-
     "test:cypress:open": "cypress open",
     "test:cypress:run": "cypress run",
     "test:cypress:acceptance": "cypress run --env tags=@Acceptance",
     "test:cypress:smoke": "cypress run --env tags=@Smoke",
     "test:cypress:regression": "cypress run --env tags=@Regression",
-
     "allure:generate": "allure generate allure-results --clean -o allure-report",
     "allure:open": "allure open allure-report",
-    "allure:serve": "allure serve allure-results"
+    "allure:serve": "allure serve allure-results",
+
+    "ai:generate": "ts-node --project tsconfig.json scripts/ai-generate-feature.ts",
+    "ai:generate:mock": "ts-node --project tsconfig.json scripts/ai-generate-feature.ts --mock"
   },
   "dependencies": {
     "express": "^4.19.2"
   },
   "devDependencies": {
+    "@anthropic-ai/sdk": "^0.92.0",
     "@badeball/cypress-cucumber-preprocessor": "^20.1.1",
     "@bahmutov/cypress-esbuild-preprocessor": "^2.2.1",
     "@cucumber/cucumber": "^10.8.0",

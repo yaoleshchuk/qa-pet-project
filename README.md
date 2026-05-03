@@ -279,4 +279,59 @@ Located in `tests/automation/api/sql/`. Each query matches a specific test scena
 
 ---
 
+## AI Feature Generator
+
+An interactive CLI tool that uses the **Claude API** to generate Gherkin `.feature` files from a plain-English description.
+
+### How it works
+
+```
+You describe what to test
+        ↓
+CLI asks: test type, tags, test design technique
+        ↓
+Claude API generates a full Gherkin feature
+        ↓
+File is saved to tests/manual/features/{e2e|api}/
+```
+
+### Setup
+
+Add your Anthropic API key to `.env`:
+
+```env
+ANTHROPIC_API_KEY=sk-ant-...
+```
+
+Get a key at [console.anthropic.com](https://console.anthropic.com).
+
+### Usage
+
+```bash
+npm run ai:generate
+```
+
+Example session:
+
+```
+╔══════════════════════════════════════╗
+║   AI Feature File Generator  🤖       ║
+╚══════════════════════════════════════╝
+
+? Describe the feature to test: hotel price filter with currency switch
+? Test type (e2e / api): (e2e) e2e
+? Tags (e.g. @Smoke @Regression): (@ Smoke @Regression)
+  Techniques: 0) none  1) BVA  2) EP  3) Decision Table  4) State Transition  5) Error Guessing
+? Test design technique (0–5): (0) 3
+
+  ⏳  Calling Claude API…
+
+  ✅  Feature file generated!
+     → tests/manual/features/e2e/decision_table_hotel_price_filter_with_currency_switch.feature
+```
+
+The generated file follows the same Gherkin conventions and tagging strategy as the rest of the suite.
+
+---
+
 Built with ☕ by [Yaroslav Oleshchuk](https://linkedin.com/in/yaoleshchuk)
