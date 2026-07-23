@@ -46,7 +46,7 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       # ── Mock server ────────────────────────────────────────────────────────
       - name: Start mock API server
@@ -55,26 +55,31 @@ jobs:
       - name: Wait for mock server to be ready
         run: |
           for i in $(seq 1 10); do
-            curl -sf http://localhost:3001/health && echo " Server ready" && break
+            if curl -sf http://localhost:3001/health; then
+              echo " Server ready"
+              exit 0
+            fi
             echo "Waiting... ($i)"
             sleep 1
           done
+          echo "Mock server did not become ready" >&2
+          exit 1
+
+      - name: Type-check TypeScript
+        run: npm run typecheck
 
       # ── Run tests ──────────────────────────────────────────────────────────
       - name: Run API Acceptance tests
         if: ${{ github.event.inputs.suite == 'all' || github.event.inputs.suite == 'acceptance' || github.event_name != 'workflow_dispatch' }}
         run: API_URL=http://localhost:3001 npx cucumber-js --profile api-acceptance
-        continue-on-error: true
 
       - name: Run API Smoke tests
         if: ${{ github.event.inputs.suite == 'all' || github.event.inputs.suite == 'smoke' || github.event_name != 'workflow_dispatch' }}
         run: API_URL=http://localhost:3001 npx cucumber-js --profile api-smoke
-        continue-on-error: true
 
       - name: Run API Regression tests
         if: ${{ github.event.inputs.suite == 'all' || github.event.inputs.suite == 'regression' || github.event_name != 'workflow_dispatch' }}
         run: API_URL=http://localhost:3001 npx cucumber-js --profile api-regression
-        continue-on-error: true
 
       # ── Allure report ──────────────────────────────────────────────────────
       - name: Generate Allure HTML report

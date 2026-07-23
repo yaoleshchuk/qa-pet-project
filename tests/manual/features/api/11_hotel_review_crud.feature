@@ -46,7 +46,7 @@ Feature: Hotel Review – Full CRUD Lifecycle
   @CRUD-Negative
   Scenario: Create review with invalid rating is rejected
     When I create a review for hotel 321 with rating 6 and comment "Out of scale"
-    Then the response status should be 422
+    Then the response status should be 400
     And the response should contain field "error"
 
   @CRUD-Negative

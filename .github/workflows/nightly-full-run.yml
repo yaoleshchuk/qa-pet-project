@@ -14,9 +14,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - run: npm install
+      - run: npm ci
       - name: Run @Acceptance (dry-run)
-        run: npx cucumber-js --profile acceptance --dry-run
+        run: npm run test:pw:acceptance
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -33,9 +33,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - run: npm install
+      - run: npm ci
       - name: Run @Smoke (dry-run)
-        run: npx cucumber-js --profile smoke --dry-run
+        run: npm run test:pw:smoke
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -52,9 +52,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - run: npm install
+      - run: npm ci
       - name: Run @Regression (dry-run)
-        run: npx cucumber-js --profile regression --dry-run
+        run: npm run test:pw:regression
       - uses: actions/upload-artifact@v4
         if: always()
         with:

@@ -5,7 +5,12 @@
 [![Manual Quality Gate](https://github.com/yaoleshchuk/qa-pet-project/actions/workflows/manual-quality-gate.yml/badge.svg)](https://github.com/yaoleshchuk/qa-pet-project/actions/workflows/manual-quality-gate.yml)
 [![API Mock Tests](https://github.com/yaoleshchuk/qa-pet-project/actions/workflows/api-mock-tests.yml/badge.svg)](https://github.com/yaoleshchuk/qa-pet-project/actions/workflows/api-mock-tests.yml)
 
-A complete **QA automation portfolio** built on [Booking.com](https://booking.com) using industry-standard practices: Gherkin BDD, Playwright (TypeScript), Cypress (JavaScript), and GitHub Actions CI/CD.
+A portfolio-focused **QA automation project** modelled on [Booking.com](https://booking.com), using Gherkin BDD, Playwright (TypeScript), Cypress (JavaScript), and GitHub Actions CI/CD.
+
+> **Execution model:** the mock API suite is deterministic and runs for real.
+> UI suites are primarily specifications and step-contract checks against a
+> live third-party website. Experimental scenarios remain visible under `@WIP`
+> but are deliberately excluded from quality gates.
 
 ---
 
@@ -55,9 +60,9 @@ tests/
 │           ├── ep_login_credentials.feature   ← Equivalence Partitioning
 │           ├── decision_table_search_filters.feature ← Decision Table
 │           ├── state_transition_booking_flow.feature ← State Transition
-│           ├── ai_price_filter_currency_switch.feature ← 🤖 AI-generated (Decision Table)
-│           ├── ai_wishlist_state_transition.feature    ← 🤖 AI-generated (State Transition)
-│           └── ai_guest_count_bva.feature              ← 🤖 AI-generated (BVA)
+│           ├── ai_price_filter_currency_switch.feature ← 🤖 AI-generated (Decision Table, WIP)
+│           ├── ai_wishlist_state_transition.feature    ← 🤖 AI-generated (State Transition, WIP)
+│           └── ai_guest_count_bva.feature              ← 🤖 AI-generated (BVA, WIP)
 └── automation/
     ├── api/
     │   ├── playwright/              # Playwright API step definitions (TS)
@@ -125,7 +130,7 @@ This project demonstrates six core ISTQB test design techniques:
 
 ### Prerequisites
 
-- Node.js ≥ 20
+- Node.js 20 LTS
 - npm ≥ 9
 
 ### Setup
@@ -133,7 +138,7 @@ This project demonstrates six core ISTQB test design techniques:
 ```bash
 git clone https://github.com/yaoleshchuk/qa-pet-project.git
 cd qa-pet-project
-npm install
+npm ci
 npx playwright install chromium --with-deps
 ```
 
@@ -159,7 +164,8 @@ TEST_USER_PASSWORD=yourpassword
 ### Playwright + Cucumber (dry-run — step validation)
 
 ```bash
-# Validate suite structure without a browser (fast, used in CI)
+# Validate suite structure without a browser (fast, used in CI).
+# The command exits non-zero if any non-WIP step is undefined.
 npm run test:pw:dry-run
 
 # Run by suite (dry-run)
@@ -175,6 +181,7 @@ npm run test:pw:regression
 npm run mock:start
 
 # 2. In a separate terminal — run tests by suite
+npm run test:api:all          # all implemented @API scenarios
 npm run test:api:acceptance   # @API + @Acceptance
 npm run test:api:smoke        # @API + @Smoke
 npm run test:api:regression   # @API + @Regression
@@ -188,6 +195,8 @@ npm run allure:open
 > data, enabling fully deterministic test results without network access.
 
 ### Cypress
+
+These commands exercise the live UI and are intentionally non-blocking for CI:
 
 ```bash
 # Interactive runner
@@ -203,10 +212,12 @@ npm run test:cypress:smoke
 
 ```bash
 # Run a single script
-BASE_URL=https://api.booking.com bash tests/automation/api/curl/01_login_success.sh
+BASE_URL=http://localhost:3001 bash tests/automation/api/curl/01_login_success.sh
 
 # Run all scripts
-for f in tests/automation/api/curl/*.sh; do bash "$f" && echo; done
+for f in tests/automation/api/curl/*.sh; do
+  BASE_URL=http://localhost:3001 bash "$f" && echo
+done
 ```
 
 ---
@@ -220,7 +231,10 @@ for f in tests/automation/api/curl/*.sh; do bash "$f" && echo; done
 | [`nightly-full-run.yml`](.github/workflows/nightly-full-run.yml) | Daily 00:00 UTC | All three suites sequentially (dry-run) |
 | [`api-mock-tests.yml`](.github/workflows/api-mock-tests.yml) | Push to `main`, daily 01:30 UTC, manual dispatch | Real API tests against mock server → Allure report → GitHub Pages |
 
-The dry-run workflows validate step matching without a browser or live API. The mock-server workflow runs tests for real — against an Express mock server — and publishes an Allure HTML report to GitHub Pages.
+The dry-run workflows type-check the TypeScript suite and fail on undefined
+non-WIP steps without opening a browser. The mock-server workflow runs API
+tests for real, fails on test errors, and publishes an Allure HTML report to
+GitHub Pages.
 
 > **To enable GitHub Pages**: go to *Settings → Pages → Source* and set it to **GitHub Actions**.
 
@@ -288,7 +302,7 @@ Located in `tests/automation/api/sql/`. Each query matches a specific test scena
 
 ## AI Feature Generator
 
-An interactive CLI tool that uses the **Claude API** to generate Gherkin `.feature` files from a plain-English description.
+An interactive CLI tool that uses the **Claude API** to generate draft Gherkin `.feature` files from a plain-English description.
 
 ### How it works
 
@@ -297,9 +311,9 @@ You describe what to test
         ↓
 CLI asks: test type, tags, test design technique
         ↓
-Claude API generates a full Gherkin feature
+Claude API generates a draft Gherkin feature tagged @WIP
         ↓
-File is saved to tests/manual/features/{e2e|api}/
+File is saved to tests/manual/features/{e2e|api}/ for review and automation
 ```
 
 ### Setup
@@ -337,7 +351,8 @@ Example session:
      → tests/manual/features/e2e/decision_table_hotel_price_filter_with_currency_switch.feature
 ```
 
-The generated file follows the same Gherkin conventions and tagging strategy as the rest of the suite.
+Generated files always start with `@WIP`. Remove the tag only after the steps
+are implemented and the relevant dry-run profile passes.
 
 ---
 

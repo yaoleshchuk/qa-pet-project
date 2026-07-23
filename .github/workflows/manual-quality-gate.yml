@@ -28,11 +28,13 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
+      - name: Type-check TypeScript
+        run: npm run typecheck
 
       - name: Validate ${{ github.event.inputs.tag }} test suite (dry-run)
-        run: npx cucumber-js --profile ${{ github.event.inputs.tag }} --dry-run
+        run: npm run test:pw:${{ github.event.inputs.tag }}
 
       - name: Upload test report
         if: always()

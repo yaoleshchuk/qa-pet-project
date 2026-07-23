@@ -4,7 +4,7 @@ require('dotenv').config();
 
 class BookingPage {
   visit() {
-    cy.visit(Cypress.env('baseUrl') || 'https://www.booking.com');
+    cy.visit('/');
   }
 
   clickButton(label) {
@@ -20,9 +20,16 @@ class BookingPage {
   }
 
   search(city, checkin, checkout, adults) {
-    cy.get('input[name="ss"]').clear().type(city);
-    cy.get('button[type=submit]').click();
-    // NOTE: Add date/adult picker selectors if needed
+    const params = new URLSearchParams({
+      ss: city,
+      checkin,
+      checkout,
+      group_adults: adults,
+      no_rooms: '1',
+      group_children: '0',
+    });
+
+    cy.visit(`/searchresults.html?${params.toString()}`);
   }
 
   applyFilter(filterName) {

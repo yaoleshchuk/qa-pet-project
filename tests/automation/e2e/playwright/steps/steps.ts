@@ -3,19 +3,21 @@ import { expect } from '@playwright/test';
 import { BookingPage } from '../pages/selectors';
 import { page } from '../../fixtures/world';
 
-const booking = new BookingPage(page);
+// The page is created in Cucumber's Before hook, so resolve the page object
+// inside each step instead of capturing an undefined page at module load time.
+const booking = () => new BookingPage(page);
 
 // ─── Navigation ───────────────────────────────────────────────────────────────
 
 Given('I open the Booking.com homepage', async () => {
-  await booking.gotoHomePage();
+  await booking().gotoHomePage();
 });
 
 Given(/^I am logged in as "([^"]+)" with password "([^"]+)"$/, async (email: string, password: string) => {
-  await booking.gotoHomePage();
-  await booking.clickSignIn();
-  await booking.enterEmail(email);
-  await booking.enterPassword(password);
+  await booking().gotoHomePage();
+  await booking().clickSignIn();
+  await booking().enterEmail(email);
+  await booking().enterPassword(password);
 });
 
 Given('I am on the contact page', async () => {
@@ -23,57 +25,57 @@ Given('I am on the contact page', async () => {
 });
 
 Given('I have searched for hotels in {string} from {string} to {string}', async (city: string, checkin: string, checkout: string) => {
-  await booking.search(city, checkin, checkout, '2');
+  await booking().search(city, checkin, checkout, '2');
 });
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 
 When('I click on the {string} button', async (label: string) => {
-  await booking.clickButton(label);
+  await booking().clickButton(label);
 });
 
 When('I enter email {string} and click {string}', async (email: string, btn: string) => {
-  await booking.enterEmail(email);
-  await booking.clickButton(btn);
+  await booking().enterEmail(email);
+  await booking().clickButton(btn);
 });
 
 When('I enter password {string} and click {string}', async (password: string, btn: string) => {
-  await booking.enterPassword(password);
-  await booking.clickButton(btn);
+  await booking().enterPassword(password);
+  await booking().clickButton(btn);
 });
 
 // ─── Search & Filters ─────────────────────────────────────────────────────────
 
 When(/^I search for hotels in "([^"]+)" from "([^"]+)" to "([^"]+)" for "([^"]+)" adults$/, async (city, checkin, checkout, adults) => {
-  await booking.search(city, checkin, checkout, adults);
+  await booking().search(city, checkin, checkout, adults);
 });
 
 When(/^I apply filter "([^"]+)"$/, async (filter: string) => {
-  await booking.applyFilter(filter);
+  await booking().applyFilter(filter);
 });
 
 When('I apply filters: {string}, {string}, {string}', async (f1: string, f2: string, f3: string) => {
-  await booking.applyFilter(f1);
-  await booking.applyFilter(f2);
-  await booking.applyFilter(f3);
+  await booking().applyFilter(f1);
+  await booking().applyFilter(f2);
+  await booking().applyFilter(f3);
 });
 
 When(/^I sort results by "([^"]+)"$/, async (option: string) => {
-  await booking.sortBy(option);
+  await booking().sortBy(option);
 });
 
 When(/^I click "Save" on the first hotel$/, async () => {
-  await booking.saveFirstHotel();
+  await booking().saveFirstHotel();
 });
 
 // ─── Currency / Language ──────────────────────────────────────────────────────
 
 When('I change currency to {string}', async (currency: string) => {
-  await booking.selectCurrency(currency);
+  await booking().selectCurrency(currency);
 });
 
 When('I select language {string}', async (language: string) => {
-  await booking.selectLanguage(language);
+  await booking().selectLanguage(language);
 });
 
 // ─── Form validation ──────────────────────────────────────────────────────────

@@ -127,6 +127,32 @@ Then('response should contain list of reviews with user names and ratings', asyn
 
 // ===== REVIEW CRUD LIFECYCLE =====
 
+When(
+  /^I send POST request to \/api\/hotel\/(\d+)\/reviews with rating "([^"]+)" and comment "([^"]*)"$/,
+  async (hotelId: string, rating: string, comment: string) => {
+    response = await (global as any).request.post(`${API_URL}/api/hotel/${hotelId}/reviews`, {
+      data: { rating: Number(rating), comment }
+    });
+  }
+);
+
+When(
+  /^I send POST request to \/api\/hotel\/(\d+)\/reviews with rating "([^"]+)" and a comment of (\d+) characters$/,
+  async (hotelId: string, rating: string, characterCount: string) => {
+    response = await (global as any).request.post(`${API_URL}/api/hotel/${hotelId}/reviews`, {
+      data: {
+        rating: Number(rating),
+        comment: 'x'.repeat(Number(characterCount))
+      }
+    });
+  }
+);
+
+Then('the response field {string} should equal {string}', async (field: string, expected: string) => {
+  const body = await response!.json();
+  expect(String(body[field])).toBe(expected);
+});
+
 // CREATE (C)
 When(/^I create a review for hotel (\d+) with rating (\d+) and comment "([^"]+)"$/, async (hotelId: string, rating: string, comment: string) => {
   response = await (global as any).request.post(`${API_URL}/api/hotel/${hotelId}/reviews`, {

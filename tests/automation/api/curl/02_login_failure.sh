@@ -16,7 +16,7 @@ response=$(curl -s -w "\n%{http_code}" -X POST "${BASE_URL}/api/login" \
   -d '{"email":"fake@mail.com","password":"wrong123"}')
 
 http_code=$(echo "$response" | tail -n1)
-body=$(echo "$response" | head -n-1)
+body=$(echo "$response" | sed '$d')
 
 echo "  Status : ${http_code}"
 echo "  Body   : ${body}"

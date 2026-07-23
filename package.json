@@ -5,10 +5,12 @@
   "private": true,
   "scripts": {
     "mock:start": "node mock-server/server.js",
-    "test:pw:dry-run": "cucumber-js --profile default --dry-run",
-    "test:pw:acceptance": "cucumber-js --profile acceptance --dry-run",
-    "test:pw:smoke": "cucumber-js --profile smoke --dry-run",
-    "test:pw:regression": "cucumber-js --profile regression --dry-run",
+    "typecheck": "tsc --noEmit",
+    "test:pw:dry-run": "node scripts/validate-cucumber-profile.js default",
+    "test:pw:acceptance": "node scripts/validate-cucumber-profile.js acceptance",
+    "test:pw:smoke": "node scripts/validate-cucumber-profile.js smoke",
+    "test:pw:regression": "node scripts/validate-cucumber-profile.js regression",
+    "test:api:all": "API_URL=http://localhost:3001 cucumber-js --profile api-all",
     "test:api:acceptance": "API_URL=http://localhost:3001 cucumber-js --profile api-acceptance",
     "test:api:smoke": "API_URL=http://localhost:3001 cucumber-js --profile api-smoke",
     "test:api:regression": "API_URL=http://localhost:3001 cucumber-js --profile api-regression",
@@ -20,7 +22,6 @@
     "allure:generate": "allure generate allure-results --clean -o allure-report",
     "allure:open": "allure open allure-report",
     "allure:serve": "allure serve allure-results",
-
     "ai:generate": "ts-node --project tsconfig.json scripts/ai-generate-feature.ts",
     "ai:generate:mock": "ts-node --project tsconfig.json scripts/ai-generate-feature.ts --mock"
   },

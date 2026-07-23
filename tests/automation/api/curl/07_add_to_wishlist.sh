@@ -24,7 +24,7 @@ response=$(curl -s -w "\n%{http_code}" -X POST "${BASE_URL}/api/wishlist" \
   -d "{\"hotel_id\":${HOTEL_ID}}")
 
 http_code=$(echo "$response" | tail -n1)
-body=$(echo "$response" | head -n-1)
+body=$(echo "$response" | sed '$d')
 
 echo "  Status : ${http_code}"
 echo "  Body   : ${body}"

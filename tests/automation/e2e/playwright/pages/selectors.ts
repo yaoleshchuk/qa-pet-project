@@ -14,7 +14,7 @@ export class BookingPage {
 
   // Navigation
   async gotoHomePage() {
-    await this.page.goto(process.env.BASE_URL || 'https://www.booking.com');
+    await this.page.goto('/');
   }
 
   // Auth
@@ -36,8 +36,18 @@ export class BookingPage {
 
   // Search
   async search(city: string, checkin: string, checkout: string, adults: string) {
-    await this.searchInput.fill(city);
-    await this.page.getByRole('button', { name: /search/i }).click();
+    const params = new URLSearchParams({
+      ss: city,
+      checkin,
+      checkout,
+      group_adults: adults,
+      no_rooms: '1',
+      group_children: '0',
+    });
+
+    // Navigating with explicit search parameters keeps the portfolio example
+    // deterministic and proves that every argument participates in the flow.
+    await this.page.goto(`/searchresults.html?${params.toString()}`);
   }
 
   async applyFilter(filterName: string) {

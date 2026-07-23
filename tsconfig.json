@@ -12,7 +12,8 @@
     "baseUrl": "."
   },
   "include": [
-    "tests/automation/**/*.ts"
+    "tests/automation/**/*.ts",
+    "scripts/**/*.ts"
   ],
   "exclude": [
     "node_modules",

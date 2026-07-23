@@ -133,7 +133,9 @@ async function generateFeature(
     .split(/[\s,]+/)
     .filter(Boolean)
     .map(t => (t.startsWith('@') ? t : `@${t}`))
-    .join(' ');
+    .filter(tag => tag !== '@WIP');
+  tagList.push('@WIP');
+  const generatedTags = tagList.join(' ');
 
   const e2eExample = `@E2E @Acceptance @Smoke
 Feature: Hotel Search by City
@@ -180,10 +182,11 @@ Feature: Login API - Success
 
 Feature to test: "${description}"
 Test type: ${testType === 'e2e' ? 'End-to-end UI test (Playwright/Cypress)' : 'API test (REST)'}
-Tags to apply: ${tagList}${techniqueNote}
+Tags to apply: ${generatedTags}${techniqueNote}
 
 Requirements:
 - Start with the tags line, then Feature keyword
+- Always include @WIP until matching automation steps are implemented
 - Include "As a / I want / So that" user story
 - For e2e: include a Background with "Given I open the Booking.com homepage"
 - Mix Scenario and Scenario Outline where appropriate
@@ -195,7 +198,7 @@ ${testType === 'e2e' ? e2eExample : apiExample}
 
 Output ONLY the raw Gherkin. No markdown fences, no explanation.`;
 
-  if (IS_MOCK) return buildMockFeature(description, testType, tagList, technique);
+  if (IS_MOCK) return buildMockFeature(description, testType, generatedTags, technique);
 
   const message = await client!.messages.create({
     model: 'claude-opus-4-7',

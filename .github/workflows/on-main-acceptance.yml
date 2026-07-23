@@ -20,11 +20,13 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
+      - name: Type-check TypeScript
+        run: npm run typecheck
 
       - name: Validate @Acceptance test suite (dry-run)
-        run: npx cucumber-js --profile acceptance --dry-run
+        run: npm run test:pw:acceptance
 
       - name: Upload test report
         if: always()

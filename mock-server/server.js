@@ -156,11 +156,14 @@ app.post('/api/hotel/:id/reviews', (req, res) => {
   const { rating, comment } = req.body || {};
 
   if (typeof rating !== 'number' || !Number.isInteger(rating) || rating < 1 || rating > 5) {
-    return res.status(422).json({ error: 'Rating must be an integer between 1 and 5' });
+    return res.status(400).json({ error: 'Rating must be an integer between 1 and 5' });
+  }
+  if (typeof comment !== 'string' || comment.length < 1 || comment.length > 500) {
+    return res.status(400).json({ error: 'Comment must contain between 1 and 500 characters' });
   }
 
   const id = nextReviewId++;
-  const review = { id, hotelId, user: 'Test User', rating, comment: comment || '' };
+  const review = { id, hotelId, user: 'Test User', rating, comment };
   reviews.set(id, review);
   return res.status(201).json(review);
 });

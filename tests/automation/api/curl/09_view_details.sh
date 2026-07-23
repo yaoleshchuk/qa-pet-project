@@ -16,7 +16,7 @@ response=$(curl -s -w "\n%{http_code}" \
   "${BASE_URL}/api/hotel/${HOTEL_ID}")
 
 http_code=$(echo "$response" | tail -n1)
-body=$(echo "$response" | head -n-1)
+body=$(echo "$response" | sed '$d')
 
 echo "  Status : ${http_code}"
 

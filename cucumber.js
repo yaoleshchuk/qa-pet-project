@@ -52,6 +52,21 @@ module.exports = {
 
   // ─── Real-execution profiles (run against mock API server, emit Allure) ─────
 
+  'api-all': {
+    requireModule: ['ts-node/register'],
+    require: [
+      'tests/automation/api/playwright/world-api.ts',
+      'tests/automation/api/playwright/api.steps.ts',
+    ],
+    paths: ['tests/manual/features/api/**/*.feature'],
+    tags: '@API and not @WIP',
+    format: ['progress-bar', 'allure-cucumberjs/reporter'],
+    formatOptions: {
+      snippetInterface: 'async-await',
+      resultsDir: 'allure-results',
+    },
+  },
+
   'api-acceptance': {
     requireModule: ['ts-node/register'],
     require: [
