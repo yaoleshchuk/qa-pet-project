@@ -3,6 +3,11 @@
   "version": "1.0.0",
   "description": "QA automation showcase: Cypress + Playwright + Gherkin BDD + GitHub Actions",
   "private": true,
+  "engines": {
+    "node": "22.23.2",
+    "npm": "10.9.x"
+  },
+  "packageManager": "npm@10.9.8",
   "scripts": {
     "mock:start": "node mock-server/server.js",
     "typecheck": "tsc --noEmit",

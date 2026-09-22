@@ -1,63 +1,37 @@
-name: Quality Gate - Nightly Full Run
+name: Strict Dry-run - Nightly
 
 on:
   schedule:
-    - cron: '0 0 * * *'  # Every day at 00:00 UTC = 01:00 CET
-  workflow_dispatch: {}
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
-  acceptance:
-    name: Acceptance Tests
+  dry-run:
+    name: Strict dry-run - ${{ matrix.profile }}
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      - run: npm ci
-      - name: Run @Acceptance (dry-run)
-        run: npm run test:pw:acceptance
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: nightly-acceptance-report
-          path: reports/
-          if-no-files-found: ignore
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: [default, acceptance, smoke, regression]
 
-  smoke:
-    name: Smoke Tests
-    runs-on: ubuntu-latest
-    needs: acceptance
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version-file: '.nvmrc'
+          cache: npm
       - run: npm ci
-      - name: Run @Smoke (dry-run)
-        run: npm run test:pw:smoke
-      - uses: actions/upload-artifact@v4
+      - name: Validate included step matching without browser execution
+        env:
+          PROFILE: ${{ matrix.profile }}
+        run: node scripts/validate-cucumber-profile.js "$PROFILE" "reports/dry-run-${PROFILE}.json"
+      - name: Upload dry-run report
         if: always()
+        uses: actions/upload-artifact@v4
         with:
-          name: nightly-smoke-report
-          path: reports/
-          if-no-files-found: ignore
-
-  regression:
-    name: Regression Tests
-    runs-on: ubuntu-latest
-    needs: smoke
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      - run: npm ci
-      - name: Run @Regression (dry-run)
-        run: npm run test:pw:regression
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: nightly-regression-report
-          path: reports/
-          if-no-files-found: ignore
+          name: nightly-dry-run-${{ matrix.profile }}-${{ github.run_number }}
+          path: reports/dry-run-${{ matrix.profile }}.json
+          if-no-files-found: error
