@@ -10,6 +10,9 @@ on:
         type: choice
         options: [default, acceptance, smoke, regression]
 
+env:
+  CYPRESS_INSTALL_BINARY: 0
+
 permissions:
   contents: read
 

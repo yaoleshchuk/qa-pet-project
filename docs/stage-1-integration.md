@@ -22,7 +22,8 @@
 - JSON, Allure results, HTML и логи mock сохраняются после падения. Pages имеет
   отдельные write-permissions и не запускается для `pull_request`.
 - Node.js 22.23.2 и npm 10.9.x закреплены в `.nvmrc`, `package.json`, lockfile и CI.
-  Typecheck включает automation и `scripts/**/*.ts`.
+  Typecheck включает automation и `scripts/**/*.ts`. Неиспользуемая в этих jobs
+  загрузка Cypress binary отключена; npm-пакет Cypress по-прежнему устанавливается.
 
 ## Результаты на закреплённой среде
 
