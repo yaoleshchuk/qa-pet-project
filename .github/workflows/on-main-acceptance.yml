@@ -1,37 +1,53 @@
-name: Quality Gate - Main Branch Acceptance
+name: Static and Dry-run Quality Gate
 
 on:
+  pull_request:
   push:
-    branches:
-      - main
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  CYPRESS_INSTALL_BINARY: 0
+
+permissions:
+  contents: read
 
 jobs:
-  acceptance-tests:
-    name: Run Acceptance Tests on Main
+  typecheck:
+    name: Typecheck automation and generator
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+
+  dry-run:
+    name: Strict dry-run - ${{ matrix.profile }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: [default, acceptance, smoke, regression]
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Type-check TypeScript
-        run: npm run typecheck
-
-      - name: Validate @Acceptance test suite (dry-run)
-        run: npm run test:pw:acceptance
-
-      - name: Upload test report
+          node-version-file: '.nvmrc'
+          cache: npm
+      - run: npm ci
+      - name: Validate included step matching without browser execution
+        env:
+          PROFILE: ${{ matrix.profile }}
+        run: node scripts/validate-cucumber-profile.js "$PROFILE" "reports/dry-run-${PROFILE}.json"
+      - name: Upload dry-run report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: acceptance-report-main
-          path: reports/
-          if-no-files-found: ignore
+          name: dry-run-${{ matrix.profile }}-${{ github.run_number }}
+          path: reports/dry-run-${{ matrix.profile }}.json
+          if-no-files-found: error

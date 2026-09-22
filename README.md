@@ -130,17 +130,27 @@ This project demonstrates six core ISTQB test design techniques:
 
 ### Prerequisites
 
-- Node.js 20 LTS
-- npm ≥ 9
+- Node.js 22.23.2 (pinned in `.nvmrc`; CI reads the same file)
+- npm 10.9.x (validated with 10.9.8, bundled with this Node.js release)
 
 ### Setup
 
 ```bash
 git clone https://github.com/yaoleshchuk/qa-pet-project.git
 cd qa-pet-project
+nvm install
+nvm use
 npm ci
 npx playwright install chromium --with-deps
 ```
+
+`nvm` is optional: another version manager may install the exact version in
+`.nvmrc`. Browser installation is not needed for the API-only Cucumber suites.
+
+The staged improvement plan is in [docs/improvement-plan.md](docs/improvement-plan.md).
+See [the stage 0 baseline](docs/baseline-stage-0.md) for the historical baseline,
+and [the stage 1 integration evidence](docs/stage-1-integration.md) for checks against
+the current PR base.
 
 ### Configure environment
 
@@ -161,7 +171,7 @@ TEST_USER_PASSWORD=yourpassword
 
 ## Running Tests
 
-### Playwright + Cucumber (dry-run — step validation)
+### Playwright + Cucumber (strict dry-run — step validation)
 
 ```bash
 # Validate suite structure without a browser (fast, used in CI).
@@ -226,15 +236,19 @@ done
 
 | Workflow | Trigger | Jobs |
 |----------|---------|------|
-| [`on-main-acceptance.yml`](.github/workflows/on-main-acceptance.yml) | Push to `main` | `@Acceptance` dry-run |
-| [`manual-quality-gate.yml`](.github/workflows/manual-quality-gate.yml) | Manual dispatch | Selectable suite (acceptance / smoke / regression) |
-| [`nightly-full-run.yml`](.github/workflows/nightly-full-run.yml) | Daily 00:00 UTC | All three suites sequentially (dry-run) |
-| [`api-mock-tests.yml`](.github/workflows/api-mock-tests.yml) | Push to `main`, daily 01:30 UTC, manual dispatch | Real API tests against mock server → Allure report → GitHub Pages |
+| [`on-main-acceptance.yml`](.github/workflows/on-main-acceptance.yml) | Pull request, push to `main`, manual | Typecheck plus four independent strict dry-run profiles |
+| [`manual-quality-gate.yml`](.github/workflows/manual-quality-gate.yml) | Manual dispatch | Selectable strict dry-run profile |
+| [`nightly-full-run.yml`](.github/workflows/nightly-full-run.yml) | Daily 00:00 UTC, manual | Four independent strict dry-run profiles |
+| [`api-mock-tests.yml`](.github/workflows/api-mock-tests.yml) | Pull request, push to `main`, daily 01:30 UTC, manual | Real API suites against a restarted mock, retained diagnostics and Allure report |
 
 The dry-run workflows type-check the TypeScript suite and fail on undefined
 non-WIP steps without opening a browser. The mock-server workflow runs API
-tests for real, fails on test errors, and publishes an Allure HTML report to
-GitHub Pages.
+tests for real, records every selected suite, and preserves reports on failure.
+Pages publishing is a separate job and never runs for pull requests.
+
+`@WIP` scenarios are excluded from these gates. A green dry-run therefore means
+that all **included** steps are matched; it does not prove WIP coverage. The current
+exclusion is quantified in [stage 1 integration evidence](docs/stage-1-integration.md).
 
 > **To enable GitHub Pages**: go to *Settings → Pages → Source* and set it to **GitHub Actions**.
 
@@ -242,7 +256,8 @@ GitHub Pages.
 
 ## Allure Reports
 
-API tests produce a full **Allure HTML report** automatically on every CI run.
+API tests produce a full **Allure HTML report** as a CI artifact when results are
+available, including after a test failure.
 
 ### Live report
 

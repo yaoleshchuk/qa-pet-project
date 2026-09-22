@@ -1,0 +1,210 @@
+{
+  "date": "2026-09-22",
+  "sourceCommit": "6272e8a",
+  "node": "22.23.2",
+  "npm": "10.9.8",
+  "environment": "macOS arm64; verified in clean copy, repeated in workspace after npm ci; fresh mock per API suite",
+  "stepCountsExcludeHooks": true,
+  "runs": [
+    {
+      "name": "typecheck",
+      "exitCode": 0,
+      "signal": null,
+      "milliseconds": 682
+    },
+    {
+      "name": "dry-default",
+      "exitCode": 0,
+      "signal": null,
+      "milliseconds": 11782,
+      "scenarios": {
+        "passed": 0,
+        "failed": 0,
+        "undefined": 42,
+        "skipped": 61
+      },
+      "steps": {
+        "passed": 0,
+        "failed": 0,
+        "undefined": 92,
+        "skipped": 289
+      },
+      "undefinedFeatures": [
+        {
+          "file": "tests/manual/features/api/ai_reviews_ep.feature",
+          "scenarios": 15
+        },
+        {
+          "file": "tests/manual/features/e2e/ai_guest_count_bva.feature",
+          "scenarios": 10
+        },
+        {
+          "file": "tests/manual/features/e2e/ai_price_filter_currency_switch.feature",
+          "scenarios": 9
+        },
+        {
+          "file": "tests/manual/features/e2e/ai_wishlist_state_transition.feature",
+          "scenarios": 8
+        }
+      ]
+    },
+    {
+      "name": "dry-acceptance",
+      "exitCode": 0,
+      "signal": null,
+      "milliseconds": 1610,
+      "scenarios": {
+        "passed": 0,
+        "failed": 0,
+        "undefined": 0,
+        "skipped": 24
+      },
+      "steps": {
+        "passed": 0,
+        "failed": 0,
+        "undefined": 0,
+        "skipped": 77
+      },
+      "undefinedFeatures": []
+    },
+    {
+      "name": "dry-smoke",
+      "exitCode": 0,
+      "signal": null,
+      "milliseconds": 1364,
+      "scenarios": {
+        "passed": 0,
+        "failed": 0,
+        "undefined": 17,
+        "skipped": 18
+      },
+      "steps": {
+        "passed": 0,
+        "failed": 0,
+        "undefined": 44,
+        "skipped": 102
+      },
+      "undefinedFeatures": [
+        {
+          "file": "tests/manual/features/api/ai_reviews_ep.feature",
+          "scenarios": 3
+        },
+        {
+          "file": "tests/manual/features/e2e/ai_guest_count_bva.feature",
+          "scenarios": 4
+        },
+        {
+          "file": "tests/manual/features/e2e/ai_price_filter_currency_switch.feature",
+          "scenarios": 9
+        },
+        {
+          "file": "tests/manual/features/e2e/ai_wishlist_state_transition.feature",
+          "scenarios": 1
+        }
+      ]
+    },
+    {
+      "name": "dry-regression",
+      "exitCode": 0,
+      "signal": null,
+      "milliseconds": 1338,
+      "scenarios": {
+        "passed": 0,
+        "failed": 0,
+        "undefined": 42,
+        "skipped": 36
+      },
+      "steps": {
+        "passed": 0,
+        "failed": 0,
+        "undefined": 92,
+        "skipped": 213
+      },
+      "undefinedFeatures": [
+        {
+          "file": "tests/manual/features/api/ai_reviews_ep.feature",
+          "scenarios": 15
+        },
+        {
+          "file": "tests/manual/features/e2e/ai_guest_count_bva.feature",
+          "scenarios": 10
+        },
+        {
+          "file": "tests/manual/features/e2e/ai_price_filter_currency_switch.feature",
+          "scenarios": 9
+        },
+        {
+          "file": "tests/manual/features/e2e/ai_wishlist_state_transition.feature",
+          "scenarios": 8
+        }
+      ]
+    },
+    {
+      "name": "api-acceptance",
+      "exitCode": 0,
+      "signal": null,
+      "milliseconds": 1639,
+      "scenarios": {
+        "passed": 14,
+        "failed": 0,
+        "undefined": 0,
+        "skipped": 0
+      },
+      "steps": {
+        "passed": 43,
+        "failed": 0,
+        "undefined": 0,
+        "skipped": 0
+      },
+      "undefinedFeatures": []
+    },
+    {
+      "name": "api-smoke",
+      "exitCode": 1,
+      "signal": null,
+      "milliseconds": 1489,
+      "scenarios": {
+        "passed": 6,
+        "failed": 0,
+        "undefined": 3,
+        "skipped": 0
+      },
+      "steps": {
+        "passed": 14,
+        "failed": 0,
+        "undefined": 6,
+        "skipped": 6
+      },
+      "undefinedFeatures": [
+        {
+          "file": "tests/manual/features/api/ai_reviews_ep.feature",
+          "scenarios": 3
+        }
+      ]
+    },
+    {
+      "name": "api-regression",
+      "exitCode": 1,
+      "signal": null,
+      "milliseconds": 1427,
+      "scenarios": {
+        "passed": 4,
+        "failed": 0,
+        "undefined": 15,
+        "skipped": 0
+      },
+      "steps": {
+        "passed": 8,
+        "failed": 0,
+        "undefined": 18,
+        "skipped": 30
+      },
+      "undefinedFeatures": [
+        {
+          "file": "tests/manual/features/api/ai_reviews_ep.feature",
+          "scenarios": 15
+        }
+      ]
+    }
+  ]
+}

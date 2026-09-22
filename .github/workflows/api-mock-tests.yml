@@ -1,155 +1,155 @@
-name: API Tests — Mock Server + Allure Report
-
-# Runs real Cucumber API scenarios against the local Express mock server,
-# generates an Allure HTML report, and publishes it to GitHub Pages.
+name: Real API Tests - Mock Server
 
 on:
+  pull_request:
   push:
     branches: [main]
   schedule:
-    - cron: '30 1 * * *'   # Daily 01:30 UTC (after the nightly dry-run)
+    - cron: '30 1 * * *'
   workflow_dispatch:
     inputs:
       suite:
-        description: 'Which API suite to run?'
+        description: 'Which real API suite should run?'
         required: true
         default: 'all'
         type: choice
-        options:
-          - all
-          - acceptance
-          - smoke
-          - regression
+        options: [all, acceptance, smoke, regression]
+
+env:
+  CYPRESS_INSTALL_BINARY: 0
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
-
-# Only one deployment at a time
-concurrency:
-  group: pages
-  cancel-in-progress: false
 
 jobs:
   api-tests:
-    name: API Tests (mock server)
+    name: Real API suites against local mock
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js 20
+      - name: Setup pinned Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version-file: '.nvmrc'
+          cache: npm
 
-      - name: Install dependencies
+      - name: Install locked dependencies
         run: npm ci
 
-      # ── Mock server ────────────────────────────────────────────────────────
-      - name: Start mock API server
-        run: node mock-server/server.js &
-
-      - name: Wait for mock server to be ready
-        run: |
-          for i in $(seq 1 10); do
-            if curl -sf http://localhost:3001/health; then
-              echo " Server ready"
-              exit 0
-            fi
-            echo "Waiting... ($i)"
-            sleep 1
-          done
-          echo "Mock server did not become ready" >&2
-          exit 1
-
-      - name: Type-check TypeScript
+      - name: Typecheck automation and generator
         run: npm run typecheck
 
-      # ── Run tests ──────────────────────────────────────────────────────────
-      - name: Run API Acceptance tests
-        if: ${{ github.event.inputs.suite == 'all' || github.event.inputs.suite == 'acceptance' || github.event_name != 'workflow_dispatch' }}
-        run: API_URL=http://localhost:3001 npx cucumber-js --profile api-acceptance
+      - name: Run selected real API suites and record every result
+        env:
+          SELECTED_SUITE: ${{ github.event.inputs.suite || 'all' }}
+        run: |
+          mkdir -p reports/allure-results
+          overall=0
 
-      - name: Run API Smoke tests
-        if: ${{ github.event.inputs.suite == 'all' || github.event.inputs.suite == 'smoke' || github.event_name != 'workflow_dispatch' }}
-        run: API_URL=http://localhost:3001 npx cucumber-js --profile api-smoke
+          for suite in acceptance smoke regression; do
+            if [ "$SELECTED_SUITE" != "all" ] && [ "$SELECTED_SUITE" != "$suite" ]; then
+              continue
+            fi
 
-      - name: Run API Regression tests
-        if: ${{ github.event.inputs.suite == 'all' || github.event.inputs.suite == 'regression' || github.event_name != 'workflow_dispatch' }}
-        run: API_URL=http://localhost:3001 npx cucumber-js --profile api-regression
+            node mock-server/server.js > "reports/mock-${suite}.log" 2>&1 &
+            server_pid=$!
+            ready=0
 
-      # ── Allure report ──────────────────────────────────────────────────────
+            for attempt in $(seq 1 15); do
+              if curl --fail --silent http://localhost:3001/health > /dev/null; then
+                ready=1
+                break
+              fi
+              if ! kill -0 "$server_pid" 2>/dev/null; then
+                break
+              fi
+              sleep 1
+            done
+
+            if [ "$ready" -ne 1 ]; then
+              echo "Mock server was not ready after 15 seconds for ${suite}."
+              cat "reports/mock-${suite}.log"
+              suite_exit=1
+            else
+              set +e
+              API_URL=http://localhost:3001 npx --no-install cucumber-js \
+                --profile "api-${suite}" \
+                --format summary \
+                --format "json:reports/api-${suite}.json" \
+                --format-options "{\"resultsDir\":\"reports/allure-results/${suite}\"}"
+              suite_exit=$?
+              set -e
+            fi
+
+            kill "$server_pid" 2>/dev/null || true
+            wait "$server_pid" 2>/dev/null || true
+            echo "${suite}=${suite_exit}" | tee -a reports/api-suite-status.txt
+
+            if [ "$suite_exit" -ne 0 ]; then
+              overall=1
+            fi
+          done
+
+          exit "$overall"
+
       - name: Generate Allure HTML report
+        id: allure
         if: always()
-        run: npm run allure:generate
+        run: npx --no-install allure generate reports/allure-results --clean -o reports/allure-report
 
-      - name: Upload Allure results (raw)
+      - name: Upload API diagnostics
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: allure-results-${{ github.run_number }}
-          path: allure-results/
+          name: api-test-results-${{ github.run_number }}
+          path: |
+            reports/api-*.json
+            reports/api-suite-status.txt
+            reports/mock-*.log
+            reports/allure-results/
           if-no-files-found: warn
 
       - name: Upload Allure HTML report
-        if: always()
+        if: always() && steps.allure.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
           name: allure-report-${{ github.run_number }}
-          path: allure-report/
-          if-no-files-found: warn
-
-      # ── Job Summary with report link ───────────────────────────────────────
-      - name: Write job summary
-        if: always()
-        run: |
-          PAGES_URL="https://yaoleshchuk.github.io/qa-pet-project"
-          echo "### API Test Results" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Latest report:**" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- :test_tube: [See latest report](${PAGES_URL}/)" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "---" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Allure summary:**" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          if [ -f allure-report/widgets/summary.json ]; then
-            TOTAL=$(cat allure-report/widgets/summary.json | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['statistic']['total'])")
-            PASSED=$(cat allure-report/widgets/summary.json | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['statistic']['passed'])")
-            FAILED=$(cat allure-report/widgets/summary.json | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['statistic']['failed'])")
-            BROKEN=$(cat allure-report/widgets/summary.json | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['statistic']['broken'])")
-            echo "| Status | Count |" >> $GITHUB_STEP_SUMMARY
-            echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
-            echo "| :white_check_mark: Passed | ${PASSED} |" >> $GITHUB_STEP_SUMMARY
-            echo "| :x: Failed | ${FAILED} |" >> $GITHUB_STEP_SUMMARY
-            echo "| :warning: Broken | ${BROKEN} |" >> $GITHUB_STEP_SUMMARY
-            echo "| **Total** | **${TOTAL}** |" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "> No allure summary available" >> $GITHUB_STEP_SUMMARY
-          fi
-
-      # ── GitHub Pages deployment ────────────────────────────────────────────
-      - name: Upload report to GitHub Pages artifact store
-        if: always()
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: allure-report/
+          path: reports/allure-report/
+          if-no-files-found: error
 
   deploy-pages:
-    name: Publish Allure report to GitHub Pages
+    name: Publish latest Allure report to Pages
     needs: api-tests
+    if: >-
+      always() &&
+      (github.event_name == 'push' || github.event_name == 'schedule')
     runs-on: ubuntu-latest
-    if: always()
-
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
+      - name: Download generated report
+        uses: actions/download-artifact@v4
+        with:
+          name: allure-report-${{ github.run_number }}
+          path: reports/allure-report
+
+      - name: Prepare Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: reports/allure-report
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
