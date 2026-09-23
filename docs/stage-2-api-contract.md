@@ -31,13 +31,37 @@ PUT принимал любые значения, review не связывалс
 Существующие Gherkin-сценарии для семантически неверного rating/comment переведены с
 ожидания `400` на контрактный `422`; assertions не удалялись и не ослаблялись.
 
+## Ревью draft PR #2
+
+Повторное ревью выполнено относительно актуального remote `main` на том же commit
+`7cac7c5`; remote head PR перед исправлениями был `bd21059`. Существенные замечания и
+исправления остались в границах этапа 2:
+
+- OpenAPI recommended lint требовал operation summaries и явного объявления
+  публичной модели; добавлены `summary` и root `security: []`;
+- OpenAPI разрешал только uppercase currency codes, а сервер принимал lowercase;
+  сервер приведён к документированному регистрозависимому поведению;
+- integer seed prices не доказывали округление; цена hotel `1` стала `180.07` EUR,
+  а тест проверяет точные `198.08` USD и `153.06` GBP;
+- negative coverage расширен unknown fields, 501-char comment, PUT type/range,
+  foreign GET/PUT/DELETE, malformed/reversed price range и lowercase currency;
+- Redocly CLI 2.54.2 закреплён в lockfile, OpenAPI lint включён рядом с contract-test
+  в real API CI job.
+
+Contract-test обращается к приложению только по HTTP и не импортирует rates, seed,
+validation helpers или функции расчёта ожидаемых значений. Две временные контрольные
+мутации не вошли в commit: замена review `422` на `400` дала exit 1 и 2 failed tests;
+инверсия availability filtering дала exit 1 и 1 failed test. После возврата исходного
+поведения финальный contract-test снова прошёл 10/10.
+
 ## Проверки на закреплённой среде
 
 Среда: macOS arm64, Node.js 22.23.2, npm 10.9.8.
 
 | Команда / профиль | Exit | Фактический результат |
 | --- | ---: | --- |
-| `npm ci` | 0 | 497 packages; audit: 19 vulnerabilities (12 moderate, 7 high) |
+| `npm ci` | 0 | 498 packages; audit: 19 vulnerabilities (12 moderate, 7 high) |
+| `npm run lint:api-contract` | 0 | Redocly: valid OpenAPI; 4 documented warnings |
 | `npm run typecheck` | 0 | TypeScript automation и scripts скомпилированы |
 | `npm run test:api:contract` | 0 | 10 passed, 0 failed/skipped |
 | `npm run test:pw:dry-run` | 0 | 76 scenarios skipped; 0 undefined / ambiguous |
@@ -55,10 +79,10 @@ PUT принимал любые значения, review не связывалс
 Изменение зависимостей и исправление npm audit не входят в этап 2.
 
 Contract-test сначала подтвердил ограничение sandbox `listen EPERM`; фактический
-набор выполнен с разрешённым loopback. Финальные реальные API-профили запускались на
-отдельном порту `13007`; перед каждым профильным запуском mock перезапускался и после
+набор выполнен с разрешённым loopback. Финальные прогоны после ревью запускались на
+отдельном порту `13008`; перед каждым профильным запуском mock перезапускался и после
 него останавливался. JSON, Allure results и mock logs сохранены в новом игнорируемом
-`reports/stage2-final/`, без смешивания с историческими результатами.
+`reports/stage2-review-final/`, без смешивания с историческими результатами.
 
 ## Что именно проверяет новый contract-test
 
@@ -82,4 +106,8 @@ Contract-test сначала подтвердил ограничение sandbox
   31 развёрнутый сценарий / 163 шага под `@WIP` остаются исключёнными и не объявляются
   покрытыми или исправленными.
 - GitHub Actions локально не исполнялся; workflow дополнен командой contract-test,
-  фактический удалённый результат должен дать draft PR.
+  а после ревью также OpenAPI lint. Удалённые результаты фиксируются отдельно после
+  выполнения checks актуального head PR.
+- Redocly recommended lint имеет 4 не блокирующих warnings: private-проект не объявляет
+  license, сервер намеренно localhost, а `/health` и test-only `/api/test/reset` не
+  имеют искусственных 4xx responses.

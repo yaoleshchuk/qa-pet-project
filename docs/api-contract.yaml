@@ -5,9 +5,11 @@ info:
   description: Deterministic local teaching contract; not the Booking.com API.
 servers:
   - url: http://localhost:3001
+security: []
 paths:
   /health:
     get:
+      summary: Check mock server readiness
       operationId: health
       responses:
         '200':
@@ -22,6 +24,7 @@ paths:
                   timestamp: { type: string, format: date-time }
   /api/login:
     post:
+      summary: Log in with fixed test credentials
       operationId: login
       requestBody:
         required: true
@@ -47,6 +50,7 @@ paths:
               schema: { $ref: '#/components/schemas/ErrorResponse' }
   /api/hotels:
     get:
+      summary: Search available hotels
       operationId: searchHotels
       description: Prices are EUR-based and converted before min/max filtering. checkin/checkout form a half-open interval.
       parameters:
@@ -76,6 +80,7 @@ paths:
               schema: { $ref: '#/components/schemas/ErrorResponse' }
   /api/hotel/{hotelId}:
     get:
+      summary: Get hotel details
       operationId: getHotel
       parameters:
         - { $ref: '#/components/parameters/HotelId' }
@@ -89,6 +94,7 @@ paths:
         '404': { $ref: '#/components/responses/HotelNotFound' }
   /api/hotel/{hotelId}/reviews:
     get:
+      summary: List reviews for a hotel
       operationId: listReviews
       parameters:
         - { $ref: '#/components/parameters/HotelId' }
@@ -103,6 +109,7 @@ paths:
         '400': { $ref: '#/components/responses/InvalidId' }
         '404': { $ref: '#/components/responses/HotelNotFound' }
     post:
+      summary: Create a hotel review
       operationId: createReview
       parameters:
         - { $ref: '#/components/parameters/HotelId' }
@@ -125,6 +132,7 @@ paths:
       - { $ref: '#/components/parameters/HotelId' }
       - { $ref: '#/components/parameters/ReviewId' }
     get:
+      summary: Get one hotel review
       operationId: getReview
       responses:
         '200':
@@ -135,6 +143,7 @@ paths:
         '400': { $ref: '#/components/responses/InvalidId' }
         '404': { $ref: '#/components/responses/ReviewOrHotelNotFound' }
     put:
+      summary: Update one hotel review
       operationId: updateReview
       description: Partial update; at least one field is required. A rejected update is atomic.
       requestBody:
@@ -152,6 +161,7 @@ paths:
         '404': { $ref: '#/components/responses/ReviewOrHotelNotFound' }
         '422': { $ref: '#/components/responses/InvalidReviewValue' }
     delete:
+      summary: Delete one hotel review
       operationId: deleteReview
       description: A repeated delete returns 404 REVIEW_NOT_FOUND.
       responses:
@@ -160,6 +170,7 @@ paths:
         '404': { $ref: '#/components/responses/ReviewOrHotelNotFound' }
   /api/wishlist:
     post:
+      summary: Add a hotel ID to the wishlist
       operationId: addWishlist
       requestBody:
         required: true
@@ -175,6 +186,7 @@ paths:
         '400': { $ref: '#/components/responses/InvalidId' }
   /api/wishlist/{hotelId}:
     delete:
+      summary: Remove a hotel ID from the wishlist
       operationId: removeWishlist
       parameters:
         - { $ref: '#/components/parameters/HotelId' }
@@ -183,6 +195,7 @@ paths:
         '400': { $ref: '#/components/responses/InvalidId' }
   /api/test/reset:
     post:
+      summary: Restore the deterministic test fixture
       operationId: resetFixture
       description: Test-only. Restores seed reviews, clears wishlist, and resets the next review id to 100.
       responses:

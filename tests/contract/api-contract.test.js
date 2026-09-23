@@ -68,10 +68,16 @@ test('review structure errors are 400 and semantic value errors are 422', async 
     method: 'POST', body: JSON.stringify({ rating: 5 }),
   }), 400, 'INVALID_REVIEW');
   await expectError(await request('/api/hotel/321/reviews', {
+    method: 'POST', body: JSON.stringify({ rating: 5, comment: 'valid', extra: true }),
+  }), 400, 'INVALID_REVIEW');
+  await expectError(await request('/api/hotel/321/reviews', {
     method: 'POST', body: JSON.stringify({ rating: 6, comment: 'out of range' }),
   }), 422, 'INVALID_REVIEW');
   await expectError(await request('/api/hotel/321/reviews', {
     method: 'POST', body: JSON.stringify({ rating: 4, comment: '   ' }),
+  }), 422, 'INVALID_REVIEW');
+  await expectError(await request('/api/hotel/321/reviews', {
+    method: 'POST', body: JSON.stringify({ rating: 4, comment: 'x'.repeat(501) }),
   }), 422, 'INVALID_REVIEW');
 });
 
@@ -94,6 +100,12 @@ test('PUT is partial, validates supplied fields, and does not mutate after rejec
     method: 'PUT', body: JSON.stringify({ comment: '' }),
   }), 422, 'INVALID_REVIEW');
   await expectError(await request('/api/hotel/321/reviews/1', {
+    method: 'PUT', body: JSON.stringify({ rating: 1.5 }),
+  }), 400, 'INVALID_REVIEW');
+  await expectError(await request('/api/hotel/321/reviews/1', {
+    method: 'PUT', body: JSON.stringify({ rating: 0 }),
+  }), 422, 'INVALID_REVIEW');
+  await expectError(await request('/api/hotel/321/reviews/1', {
     method: 'PUT', body: JSON.stringify({}),
   }), 400, 'INVALID_REVIEW');
 
@@ -113,6 +125,14 @@ test('review routes require an existing hotel and enforce review ownership', asy
   assert.equal(createdResponse.status, 201);
   const created = await json(createdResponse);
   await expectError(await request(`/api/hotel/321/reviews/${created.id}`), 404, 'REVIEW_NOT_FOUND');
+  await expectError(await request(`/api/hotel/321/reviews/${created.id}`, {
+    method: 'PUT', body: JSON.stringify({ rating: 4 }),
+  }), 404, 'REVIEW_NOT_FOUND');
+  await expectError(await request(`/api/hotel/321/reviews/${created.id}`, {
+    method: 'DELETE',
+  }), 404, 'REVIEW_NOT_FOUND');
+  const ownedReview = await json(await request(`/api/hotel/1/reviews/${created.id}`));
+  assert.equal(ownedReview.comment, 'Paris review');
   await expectError(await request('/api/hotel/not-an-id/reviews'), 400, 'INVALID_ID');
   await expectError(await request('/api/hotel/321/reviews/not-an-id'), 400, 'INVALID_ID');
 });
@@ -141,15 +161,18 @@ test('fixed rates recalculate numeric prices and price filters use requested cur
   const eur = await json(await request('/api/hotels?city=Paris&currency=EUR'));
   const usd = await json(await request('/api/hotels?city=Paris&currency=USD'));
   const gbp = await json(await request('/api/hotels?city=Paris&currency=GBP'));
-  assert.equal(eur[0].price, 180);
-  assert.equal(usd[0].price, 198);
-  assert.equal(gbp[0].price, 153);
+  assert.equal(eur[0].price, 180.07);
+  assert.equal(usd[0].price, 198.08);
+  assert.equal(gbp[0].price, 153.06);
   assert.equal(usd[0].currency, 'USD');
   assert.equal(usd[0].currency_symbol, '$');
 
   const filtered = await json(await request('/api/hotels?city=Paris&currency=USD&min_price=190&max_price=200'));
   assert.deepEqual(filtered.map(({ id }) => id), [1]);
+  await expectError(await request('/api/hotels?min_price=not-a-number'), 400, 'INVALID_PRICE');
+  await expectError(await request('/api/hotels?min_price=200&max_price=100'), 422, 'INVALID_PRICE_RANGE');
   await expectError(await request('/api/hotels?currency=CAD'), 400, 'UNSUPPORTED_CURRENCY');
+  await expectError(await request('/api/hotels?currency=usd'), 400, 'UNSUPPORTED_CURRENCY');
 });
 
 test('reset restores seed reviews, wishlist, and deterministic review ids', async () => {

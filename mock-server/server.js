@@ -14,7 +14,7 @@ const VALID_CREDENTIALS = [
 ];
 
 const BASE_HOTELS = [
-  { id: 1, city: 'Paris', name: 'Hotel Le Marais', stars: 4, rating: 4.6, price: 180, address: '10 Rue de Rivoli, Paris', amenities: ['WiFi', 'Breakfast', 'Gym'] },
+  { id: 1, city: 'Paris', name: 'Hotel Le Marais', stars: 4, rating: 4.6, price: 180.07, address: '10 Rue de Rivoli, Paris', amenities: ['WiFi', 'Breakfast', 'Gym'] },
   { id: 2, city: 'Paris', name: 'Eiffel Boutique Hotel', stars: 5, rating: 4.9, price: 250, address: '25 Quai Branly, Paris', amenities: ['WiFi', 'Pool', 'Spa'] },
   { id: 3, city: 'Paris', name: 'Montmartre Garden Inn', stars: 3, rating: 4.1, price: 120, address: '18 Rue Lepic, Paris', amenities: ['WiFi', 'Breakfast'] },
   { id: 4, city: 'Rome', name: 'Colosseum Grand Hotel', stars: 5, rating: 4.8, price: 290, address: 'Via Sacra 5, Rome', amenities: ['WiFi', 'Pool', 'Breakfast', 'Spa'] },
@@ -178,7 +178,7 @@ function createApp() {
       }
     }
 
-    const currency = currencyRaw === undefined ? 'EUR' : String(currencyRaw).toUpperCase();
+    const currency = currencyRaw === undefined ? 'EUR' : String(currencyRaw);
     if (!Object.hasOwn(CURRENCY_RATES, currency)) {
       return apiError(res, 400, 'UNSUPPORTED_CURRENCY', 'currency must be one of EUR, USD, GBP');
     }
