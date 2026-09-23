@@ -84,6 +84,19 @@ Contract-test сначала подтвердил ограничение sandbox
 него останавливался. JSON, Allure results и mock logs сохранены в новом игнорируемом
 `reports/stage2-review-final/`, без смешивания с историческими результатами.
 
+## Удалённые проверки PR #2
+
+GitHub Actions проверил review commit `e3fad20b680fe46ee08964a5e5a5175750af1d57`:
+
+- run `35871698667` (`Static and Dry-run Quality Gate`) — typecheck и четыре strict
+  dry-run jobs завершились успешно;
+- run `35871698816` (`Real API Tests - Mock Server`) — real API job, включая новые
+  `npm run lint:api-contract` и `npm run test:api:contract`, завершился успешно;
+- Pages job в real API workflow был `skipped`, как и требуется для pull request.
+
+После добавления этого evidence-only изменения проверки финального head должны быть
+дожданы отдельно; результат родительского commit не подменяет результат нового SHA.
+
 ## Что именно проверяет новый contract-test
 
 - граничные валидные rating/comment и нормализацию comment;
@@ -105,9 +118,7 @@ Contract-test сначала подтвердил ограничение sandbox
 - Strict dry-run проверяет только matching включённых шагов. Ранее учтённые в этапе 1
   31 развёрнутый сценарий / 163 шага под `@WIP` остаются исключёнными и не объявляются
   покрытыми или исправленными.
-- GitHub Actions локально не исполнялся; workflow дополнен командой contract-test,
-  а после ревью также OpenAPI lint. Удалённые результаты фиксируются отдельно после
-  выполнения checks актуального head PR.
+- GitHub Actions не эмулировался локально; фактические удалённые runs приведены выше.
 - Redocly recommended lint имеет 4 не блокирующих warnings: private-проект не объявляет
   license, сервер намеренно localhost, а `/health` и test-only `/api/test/reset` не
   имеют искусственных 4xx responses.
