@@ -15,6 +15,7 @@
     "test:pw:acceptance": "node scripts/validate-cucumber-profile.js acceptance",
     "test:pw:smoke": "node scripts/validate-cucumber-profile.js smoke",
     "test:pw:regression": "node scripts/validate-cucumber-profile.js regression",
+    "test:api:contract": "node --test tests/contract/api-contract.test.js",
     "test:api:all": "API_URL=http://localhost:3001 cucumber-js --profile api-all",
     "test:api:acceptance": "API_URL=http://localhost:3001 cucumber-js --profile api-acceptance",
     "test:api:smoke": "API_URL=http://localhost:3001 cucumber-js --profile api-smoke",

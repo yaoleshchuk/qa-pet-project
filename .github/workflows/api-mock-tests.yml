@@ -42,6 +42,9 @@ jobs:
       - name: Typecheck automation and generator
         run: npm run typecheck
 
+      - name: Verify mock API contract
+        run: npm run test:api:contract
+
       - name: Run selected real API suites and record every result
         env:
           SELECTED_SUITE: ${{ github.event.inputs.suite || 'all' }}
