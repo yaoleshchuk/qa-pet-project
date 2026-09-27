@@ -3,6 +3,7 @@
 Feature: Remove from wishlist
 
   Scenario: Remove hotel from wishlist
+    Given hotel 123 is in the wishlist for this scenario
     When I send DELETE request to /api/wishlist/123
     Then the response status code should be 200
     And hotel 123 should no longer be in the wishlist

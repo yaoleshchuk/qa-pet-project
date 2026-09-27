@@ -4,4 +4,5 @@ Feature: Hotel reviews
 
   Scenario: Get reviews for hotel
     When I send GET request to /api/hotel/321/reviews
-    Then response should contain list of reviews with user names and ratings
+    Then the response status code should be 200
+    And response should contain list of reviews with user names and ratings

@@ -31,12 +31,17 @@ Feature: Hotel Review – Full CRUD Lifecycle
     Given a review exists for hotel 321
     When I update the review to rating 4 and comment "Great stay, minor noise issues"
     Then the response status should be 200
+    When I retrieve the review by id
+    Then the response status should be 200
     And the review should contain rating 4 and comment "Great stay, minor noise issues"
 
   Scenario: Delete the review (D)
     Given a review exists for hotel 321
     When I delete the review
     Then the response status should be 204
+    When I retrieve the review by id
+    Then the response status should be 404
+    And the response should contain field "error"
 
   Scenario: Verify deleted review returns 404 (verify D)
     Given a review has been deleted for hotel 321
