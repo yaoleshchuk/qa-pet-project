@@ -4,7 +4,8 @@ Feature: Hotel search with check-in/check-out
 
   Scenario Outline: Search hotels in "<city>" with date filters
     When I send GET request to /api/hotels?city=<city>&checkin=<checkin>&checkout=<checkout>
-    Then response should contain available hotels in "<city>"
+    Then the response status code should be 200
+    And response should contain available hotels in "<city>"
 
     Examples:
       | city      | checkin     | checkout    |
