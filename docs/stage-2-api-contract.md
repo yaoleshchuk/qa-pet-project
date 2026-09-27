@@ -109,6 +109,40 @@ GitHub Actions проверил review commit `e3fad20b680fe46ee08964a5e5a517575
 - точные числовые цены в EUR/USD/GBP и filtering в валюте ответа;
 - восстановление seed и детерминированного next ID через reset.
 
+## Разбор зависимостей перед слиянием
+
+Audit выполнен 2026-09-27 на Node.js 22.23.2/npm 10.9.8 отдельно для
+`main@7cac7c5` и head PR, с одним и тем же актуальным advisory snapshot. До
+исправления оба lockfile давали одинаковые `19` записей: `12 moderate`, `7 high`,
+`0 critical`; production-only audit в обоих случаях давал одинаковые три
+`moderate` по цепочке `express@4.22.2 -> body-parser@1.20.6/qs@6.15.3`.
+Добавленный в PR `@redocly/cli@2.54.2` не добавил ни одной уязвимой цепочки.
+
+Обычный `npm audit fix` без `--force` обновил только совместимые версии в lockfile:
+`express 4.22.2 -> 4.22.3`, `body-parser 1.20.6 -> 1.20.8`, их `qs 6.15.3 ->
+6.16.0`, `js-yaml 4.3.0 -> 4.3.2` и уязвимые экземпляры `brace-expansion` в
+допустимых диапазонах. После этого `npm audit --omit=dev` сообщает `0`
+уязвимостей; полный audit — `10 moderate`, `5 high`, `0 critical`.
+
+Оставшиеся записи относятся к существовавшему test toolchain, но не считаются
+безопасными только из-за `devDependency`:
+
+- `cypress@13.17.0 -> extract-zip@2.0.1` — high path traversal/arbitrary write при
+  распаковке специально подготовленного архива; путь исполняется при установке
+  Cypress и важен для developer/CI host, но не достижим HTTP-запросом к mock-серверу;
+- `@badeball/cypress-cucumber-preprocessor@20.1.2 -> mocha@10.8.2 ->
+  serialize-javascript@6.0.2` — high RCE/DoS требует специально подготовленного
+  сериализуемого объекта внутри тестового процесса; не входит в runtime mock-сервера;
+- `@cucumber/cucumber@10.9.0 -> tmp@0.2.3` — high path traversal/symlink write
+  затрагивает локальные/CI временные файлы при управляемых параметрах пути, но не API;
+- связанные `esbuild`, `uuid`, `qs@6.14.2` и агрегирующие записи Cucumber/Cypress
+  остаются moderate или наследуют severity вышеперечисленных цепочек.
+
+Автоматический audit предлагает только breaking upgrades: Cypress `16.1.0`,
+preprocessor `28.0.0` и Cucumber `13.2.1`. Они затрагивают Cypress-конфигурацию,
+step integration и browser execution, поэтому требуют отдельной задачи миграции с
+реальными Cypress-прогонами; это не безопасное lockfile-исправление этапа 2.
+
 ## Границы
 
 - Это фиксированная учебная модель, не полный Booking.com API: нет persistence,
