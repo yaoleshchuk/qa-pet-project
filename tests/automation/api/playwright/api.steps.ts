@@ -206,13 +206,13 @@ Then('wishlist should contain hotel 123', async function (this: ApiWorld) {
 
 When(/^I send DELETE request to \/api\/wishlist\/123$/, async function (this: ApiWorld) {
   this.response = await requestFor(this).delete('/api/wishlist/123');
-  if (this.response.status() === 200) this.wishlistHotelIds.delete(123);
 });
 
 Then('hotel 123 should no longer be in the wishlist', async function (this: ApiWorld) {
   const body = await bodyOf<{ wishlist: unknown }>(this);
   expect(Array.isArray(body.wishlist)).toBe(true);
   expect(body.wishlist).toEqual([]);
+  this.wishlistHotelIds.delete(123);
 });
 
 // Hotel details and review list
@@ -310,7 +310,7 @@ Given('a review has been deleted for hotel 321', async function (this: ApiWorld)
   expectReviewShape(review);
   const deleteResponse = await requestFor(this).delete(`/api/hotel/321/reviews/${review.id}`);
   expect(deleteResponse.status()).toBe(204);
-  this.forgetReview(review.id);
+  this.markReviewDeletionRequested(review.id);
 });
 
 When('I retrieve the review by id', async function (this: ApiWorld) {
@@ -340,5 +340,5 @@ When(/^I update review (\d+) for hotel (\d+) to rating (\d+) and comment "([^"]+
 When('I delete the review', async function (this: ApiWorld) {
   const reviewId = reviewIdFor(this);
   this.response = await requestFor(this).delete(`/api/hotel/${reviewHotelIdFor(this)}/reviews/${reviewId}`);
-  if (this.response.status() === 204) this.forgetReview(reviewId);
+  if (this.response.status() === 204) this.markReviewDeletionRequested(reviewId);
 });
