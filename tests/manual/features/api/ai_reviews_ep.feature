@@ -6,15 +6,15 @@
 # │                                                                      │
 # │  Input: review rating (integer)                                     │
 # │  Partitions:                                                         │
-# │    EP1 – Below valid range  : rating ≤ 0         → 400 Bad Request  │
+# │    EP1 – Below valid range  : rating ≤ 0         → 422 Unprocessable │
 # │    EP2 – Valid range        : 1 ≤ rating ≤ 5    → 201 Created       │
-# │    EP3 – Above valid range  : rating ≥ 6         → 400 Bad Request  │
+# │    EP3 – Above valid range  : rating ≥ 6         → 422 Unprocessable │
 # │                                                                      │
 # │  Input: review comment (string)                                      │
 # │  Partitions:                                                         │
-# │    EP4 – Empty string       : ""                 → 400 Bad Request  │
+# │    EP4 – Empty string       : ""                 → 422 Unprocessable │
 # │    EP5 – Valid string       : 1–500 chars        → 201 Created       │
-# │    EP6 – Oversized string   : > 500 chars        → 400 Bad Request  │
+# │    EP6 – Oversized string   : > 500 chars        → 422 Unprocessable │
 # └─────────────────────────────────────────────────────────────────────┘
 Feature: Hotel Reviews API — Equivalence Partitioning on Rating and Comment
   As a QA engineer
@@ -41,7 +41,7 @@ Feature: Hotel Reviews API — Equivalence Partitioning on Rating and Comment
   @Regression
   Scenario Outline: Ratings below valid range are rejected (EP1)
     When I send POST request to /api/hotel/321/reviews with rating "<rating>" and comment "Great stay!"
-    Then the response status code should be 400
+    Then the response status code should be 422
     And the response should contain field "error"
 
     Examples: Representative values below the valid partition
@@ -55,7 +55,7 @@ Feature: Hotel Reviews API — Equivalence Partitioning on Rating and Comment
   @Regression
   Scenario Outline: Ratings above valid range are rejected (EP3)
     When I send POST request to /api/hotel/321/reviews with rating "<rating>" and comment "Great stay!"
-    Then the response status code should be 400
+    Then the response status code should be 422
     And the response should contain field "error"
 
     Examples: Representative values above the valid partition
@@ -83,7 +83,7 @@ Feature: Hotel Reviews API — Equivalence Partitioning on Rating and Comment
   @Regression
   Scenario: Empty comment is rejected (EP4)
     When I send POST request to /api/hotel/321/reviews with rating "4" and comment ""
-    Then the response status code should be 400
+    Then the response status code should be 422
     And the response should contain field "error"
 
   # ── EP6: oversized comment ────────────────────────────────────────────
@@ -91,13 +91,13 @@ Feature: Hotel Reviews API — Equivalence Partitioning on Rating and Comment
   @Regression
   Scenario: Comment exceeding 500 characters is rejected (EP6)
     When I send POST request to /api/hotel/321/reviews with rating "4" and a comment of 501 characters
-    Then the response status code should be 400
+    Then the response status code should be 422
     And the response should contain field "error"
 
   # ── Combined invalid inputs ───────────────────────────────────────────
 
   @Regression
-  Scenario: Both invalid rating and empty comment returns 400
+  Scenario: Both invalid rating and empty comment returns 422
     When I send POST request to /api/hotel/321/reviews with rating "0" and comment ""
-    Then the response status code should be 400
+    Then the response status code should be 422
     And the response should contain field "error"

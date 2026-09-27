@@ -1,0 +1,298 @@
+openapi: 3.0.3
+info:
+  title: QA Pet Project Mock API
+  version: 2.0.0
+  description: Deterministic local teaching contract; not the Booking.com API.
+servers:
+  - url: http://localhost:3001
+security: []
+paths:
+  /health:
+    get:
+      summary: Check mock server readiness
+      operationId: health
+      responses:
+        '200':
+          description: Server is ready.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, timestamp]
+                properties:
+                  status: { type: string, enum: [ok] }
+                  timestamp: { type: string, format: date-time }
+  /api/login:
+    post:
+      summary: Log in with fixed test credentials
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string }
+                password: { type: string }
+      responses:
+        '200': { description: Valid test credentials. }
+        '400':
+          description: Body is not an object containing string email and password.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '401':
+          description: Invalid credentials.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+  /api/hotels:
+    get:
+      summary: Search available hotels
+      operationId: searchHotels
+      description: Prices are EUR-based and converted before min/max filtering. checkin/checkout form a half-open interval.
+      parameters:
+        - { in: query, name: city, schema: { type: string } }
+        - { in: query, name: checkin, schema: { type: string, format: date } }
+        - { in: query, name: checkout, schema: { type: string, format: date } }
+        - { in: query, name: min_price, schema: { type: number, minimum: 0 } }
+        - { in: query, name: max_price, schema: { type: number, minimum: 0 } }
+        - { in: query, name: currency, schema: { type: string, enum: [EUR, USD, GBP], default: EUR } }
+      responses:
+        '200':
+          description: Available hotels matching all supplied filters.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/SearchHotel' }
+        '400':
+          description: Malformed, incomplete, repeated, or unsupported query value.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '422':
+          description: checkout is not later than checkin, or min_price exceeds max_price.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+  /api/hotel/{hotelId}:
+    get:
+      summary: Get hotel details
+      operationId: getHotel
+      parameters:
+        - { $ref: '#/components/parameters/HotelId' }
+      responses:
+        '200':
+          description: Hotel details.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Hotel' }
+        '400': { $ref: '#/components/responses/InvalidId' }
+        '404': { $ref: '#/components/responses/HotelNotFound' }
+  /api/hotel/{hotelId}/reviews:
+    get:
+      summary: List reviews for a hotel
+      operationId: listReviews
+      parameters:
+        - { $ref: '#/components/parameters/HotelId' }
+      responses:
+        '200':
+          description: Reviews for the existing hotel; may be empty.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Review' }
+        '400': { $ref: '#/components/responses/InvalidId' }
+        '404': { $ref: '#/components/responses/HotelNotFound' }
+    post:
+      summary: Create a hotel review
+      operationId: createReview
+      parameters:
+        - { $ref: '#/components/parameters/HotelId' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateReview' }
+      responses:
+        '201':
+          description: Review created.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Review' }
+        '400': { $ref: '#/components/responses/InvalidRequest' }
+        '404': { $ref: '#/components/responses/HotelNotFound' }
+        '422': { $ref: '#/components/responses/InvalidReviewValue' }
+  /api/hotel/{hotelId}/reviews/{reviewId}:
+    parameters:
+      - { $ref: '#/components/parameters/HotelId' }
+      - { $ref: '#/components/parameters/ReviewId' }
+    get:
+      summary: Get one hotel review
+      operationId: getReview
+      responses:
+        '200':
+          description: Review belonging to hotelId.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Review' }
+        '400': { $ref: '#/components/responses/InvalidId' }
+        '404': { $ref: '#/components/responses/ReviewOrHotelNotFound' }
+    put:
+      summary: Update one hotel review
+      operationId: updateReview
+      description: Partial update; at least one field is required. A rejected update is atomic.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateReview' }
+      responses:
+        '200':
+          description: Updated review.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Review' }
+        '400': { $ref: '#/components/responses/InvalidRequest' }
+        '404': { $ref: '#/components/responses/ReviewOrHotelNotFound' }
+        '422': { $ref: '#/components/responses/InvalidReviewValue' }
+    delete:
+      summary: Delete one hotel review
+      operationId: deleteReview
+      description: A repeated delete returns 404 REVIEW_NOT_FOUND.
+      responses:
+        '204': { description: Deleted; no response body. }
+        '400': { $ref: '#/components/responses/InvalidId' }
+        '404': { $ref: '#/components/responses/ReviewOrHotelNotFound' }
+  /api/wishlist:
+    post:
+      summary: Add a hotel ID to the wishlist
+      operationId: addWishlist
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [hotel_id]
+              properties:
+                hotel_id: { type: integer, minimum: 1 }
+      responses:
+        '200': { description: Current wishlist. }
+        '400': { $ref: '#/components/responses/InvalidId' }
+  /api/wishlist/{hotelId}:
+    delete:
+      summary: Remove a hotel ID from the wishlist
+      operationId: removeWishlist
+      parameters:
+        - { $ref: '#/components/parameters/HotelId' }
+      responses:
+        '200': { description: Current wishlist. }
+        '400': { $ref: '#/components/responses/InvalidId' }
+  /api/test/reset:
+    post:
+      summary: Restore the deterministic test fixture
+      operationId: resetFixture
+      description: Test-only. Restores seed reviews, clears wishlist, and resets the next review id to 100.
+      responses:
+        '204': { description: Fixture restored; no response body. }
+components:
+  parameters:
+    HotelId:
+      in: path
+      name: hotelId
+      required: true
+      schema: { type: integer, minimum: 1 }
+    ReviewId:
+      in: path
+      name: reviewId
+      required: true
+      schema: { type: integer, minimum: 1 }
+  schemas:
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code: { type: string }
+        message: { type: string }
+        details: {}
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error: { $ref: '#/components/schemas/Error' }
+    Hotel:
+      type: object
+      required: [id, city, name, stars, rating, address, amenities]
+      properties:
+        id: { type: integer }
+        city: { type: string }
+        name: { type: string }
+        stars: { type: integer }
+        rating: { type: number }
+        price: { type: number }
+        address: { type: string }
+        description: { type: string }
+        amenities: { type: array, items: { type: string } }
+    SearchHotel:
+      allOf:
+        - { $ref: '#/components/schemas/Hotel' }
+        - type: object
+          required: [price, currency, currency_symbol]
+          properties:
+            price: { type: number, description: Converted from the EUR seed and rounded to 2 decimal places. }
+            currency: { type: string, enum: [EUR, USD, GBP] }
+            currency_symbol: { type: string, enum: ['€', '$', '£'] }
+    Review:
+      type: object
+      required: [id, hotelId, user, rating, comment]
+      properties:
+        id: { type: integer, minimum: 1 }
+        hotelId: { type: integer, minimum: 1 }
+        user: { type: string }
+        rating: { type: integer, minimum: 1, maximum: 5 }
+        comment: { type: string, minLength: 1, maxLength: 500 }
+    CreateReview:
+      type: object
+      additionalProperties: false
+      required: [rating, comment]
+      properties:
+        rating: { type: integer, minimum: 1, maximum: 5 }
+        comment: { type: string, minLength: 1, maxLength: 500, description: Trimmed before validation and storage. }
+    UpdateReview:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        rating: { type: integer, minimum: 1, maximum: 5 }
+        comment: { type: string, minLength: 1, maxLength: 500, description: Trimmed before validation and storage. }
+  responses:
+    InvalidId:
+      description: Path id is not a positive integer (400).
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    InvalidRequest:
+      description: Malformed JSON, wrong field type, missing required field, empty update, or unknown field (400).
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    InvalidReviewValue:
+      description: Rating or normalized comment is outside its allowed range (422).
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    HotelNotFound:
+      description: Hotel does not exist (404).
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    ReviewOrHotelNotFound:
+      description: Hotel is absent, or review is absent or belongs to another hotel (404).
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
