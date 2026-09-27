@@ -96,5 +96,20 @@ failure, 40 passed. Следующий сценарий в том же проц�
 все undefined без загрузки step definitions. Они исключены выражением `not @WIP` и не
 считаются исправленными или прошедшими. Реальные UI/Cypress-тесты не запускались.
 
-Локальные результаты выше не являются результатами GitHub Actions. Удалённые проверки
-draft PR фиксируются отдельно после проверки актуального head; PR не сливается.
+## Удалённые проверки draft PR #3
+
+GitHub Actions проверил implementation commit
+`b8b500838d97967751466ce2fd218deddc64aab5`:
+
+- run `36327036381` (`Static and Dry-run Quality Gate`) завершился успешно: typecheck
+  и четыре strict dry-run matrix jobs зелёные; четыре JSON-артефакта опубликованы;
+- run `36327036458` (`Real API Tests - Mock Server`) завершился успешно: real API job,
+  включая OpenAPI lint и contract tests, зелёный; API results и Allure report
+  опубликованы;
+- Pages job в real API workflow был `skipped`, как требуется для pull request.
+
+Предупреждения runs относятся к объявленной GitHub миграции runtime используемых
+actions с Node.js 20 и будущей смене образа `ubuntu-latest`; они не являются падениями
+проверок этапа 3. После этого evidence-only изменения CI финального head проверяется
+отдельно, чтобы не создавать бесконечную цепочку evidence commits. PR остаётся draft и
+не сливается.
