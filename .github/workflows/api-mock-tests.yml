@@ -138,6 +138,7 @@ jobs:
         run: npm ci
       - name: Run the shared Playwright and Cypress API scenarios
         run: |
+          rm -rf reports/cypress-api
           mkdir -p reports/cypress-api
           node mock-server/server.js > reports/cypress-api/mock.log 2>&1 &
           server_pid=$!

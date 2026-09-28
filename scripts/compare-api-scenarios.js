@@ -19,8 +19,9 @@ function scenarios(report, source) {
   for (const feature of report) {
     for (const scenario of feature.elements || []) {
       if (scenario.keyword !== 'Scenario' && scenario.keyword !== 'Scenario Outline') continue;
-      const steps = (scenario.steps || []).filter((step) => !step.hidden);
-      const statuses = steps.map((step) => step.result?.status);
+      const allSteps = scenario.steps || [];
+      const steps = allSteps.filter((step) => !step.hidden);
+      const statuses = allSteps.map((step) => step.result?.status);
       if (statuses.some((status) => status !== 'passed')) {
         throw new Error(`${source} did not pass ${feature.uri}: ${scenario.name} (${statuses.join(', ')})`);
       }
@@ -31,6 +32,13 @@ function scenarios(report, source) {
   return items.sort();
 }
 
+function countByIdentity(items) {
+  return items.reduce((counts, item) => {
+    counts.set(item, (counts.get(item) || 0) + 1);
+    return counts;
+  }, new Map());
+}
+
 if (process.argv.length !== 4) {
   console.error('Usage: node scripts/compare-api-scenarios.js <playwright.json> <cypress.json>');
   process.exit(2);
@@ -39,11 +47,21 @@ if (process.argv.length !== 4) {
 try {
   const playwright = scenarios(readReport(process.argv[2]), 'Playwright');
   const cypress = scenarios(readReport(process.argv[3]), 'Cypress');
-  const missingInCypress = playwright.filter((item) => !cypress.includes(item));
-  const missingInPlaywright = cypress.filter((item) => !playwright.includes(item));
-  if (missingInCypress.length || missingInPlaywright.length) {
+  const playwrightCounts = countByIdentity(playwright);
+  const cypressCounts = countByIdentity(cypress);
+  const identities = new Set([...playwrightCounts.keys(), ...cypressCounts.keys()]);
+  const mismatches = [...identities].filter((identity) => playwrightCounts.get(identity) !== cypressCounts.get(identity));
+  if (mismatches.length) {
+    const missingInCypress = mismatches.reduce(
+      (total, identity) => total + Math.max(0, (playwrightCounts.get(identity) || 0) - (cypressCounts.get(identity) || 0)),
+      0,
+    );
+    const missingInPlaywright = mismatches.reduce(
+      (total, identity) => total + Math.max(0, (cypressCounts.get(identity) || 0) - (playwrightCounts.get(identity) || 0)),
+      0,
+    );
     throw new Error(
-      `Scenario identity mismatch: missing in Cypress=${missingInCypress.length}, missing in Playwright=${missingInPlaywright.length}`,
+      `Scenario identity mismatch: missing in Cypress=${missingInCypress}, missing in Playwright=${missingInPlaywright}`,
     );
   }
   console.log(`Scenario identity match: ${playwright.length} executed API scenarios in Playwright and Cypress.`);

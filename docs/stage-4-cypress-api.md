@@ -47,6 +47,15 @@ loopback DELETE: очередь Cypress отменяет обычные queued c
 печатал нефатальное предупреждение о x86 helper `term-size` и очистке предыдущих
 results; реальные API runs завершились exit 0.
 
+Финальное ревью усилило comparator: он сравнивает кратность identity, поэтому
+дубликат, пропуск или лишний развернутый `Scenario Outline`/Examples теперь дают
+ошибку, как и непрошедший status, включая hidden Before/After hook, либо пустой JSON. CI перед каждым API comparison
+явно очищает `reports/cypress-api`, так что JSON от старого запуска не может сделать
+текущий job зелёным.
+Адресные synthetic JSON controls финального ревью подтвердили exit 1 для missing
+duplicate, empty report и failed hidden `After`; сохранённые отчёты реального набора
+по-прежнему совпали для 39 scenarios.
+
 CI получает отдельный Cypress API job: он запускает общий Playwright/Cypress набор
 на local mock, сравнивает identities и сохраняет JSON, mock log и screenshots при
 падении.
