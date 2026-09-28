@@ -204,7 +204,7 @@ npm run allure:open
 > The mock server simulates all Booking.com API endpoints with realistic seed
 > data, enabling fully deterministic test results without network access.
 
-### Cypress
+### Cypress UI
 
 These commands exercise the live UI and are intentionally non-blocking for CI:
 
@@ -216,6 +216,19 @@ npm run test:cypress:open
 npm run test:cypress:run
 npm run test:cypress:acceptance
 npm run test:cypress:smoke
+```
+
+### Cypress API against the local mock
+
+Start `npm run mock:start` in a separate terminal, then run one of the API-only
+commands below. They use `cypress.api.config.js`, load only shared `@API` Gherkin
+features, and reject a non-local API URL; they never visit Booking.com.
+
+```bash
+npm run test:cypress:api:all
+npm run test:cypress:api:acceptance
+npm run test:cypress:api:smoke
+npm run test:cypress:api:regression
 ```
 
 ### cURL scripts (lightweight API smoke checks)

@@ -21,7 +21,7 @@
 | 1 | Честный CI quality gate | Готов к PR 2026-09-22 | Sol / Medium |
 | 2 | API-контракт и mock-сервер | Готов к PR 2026-09-23 | Astra или Sol / High |
 | 3 | Playwright API: шаги, assertions, изоляция | Готов к PR 2026-09-27 | Sol / High |
-| 4 | Cypress API по тому же контракту | Не начат | Terra / Medium |
+| 4 | Cypress API по тому же контракту | Готов к draft PR 2026-09-28 | Terra / Medium |
 | 5 | Минимальный локальный UI-стенд | Не начат | Sol / High |
 | 6 | Реальные UI-тесты и диагностика падений | Не начат | Sol / High |
 | 7 | Проверяемый AI-генератор | Не начат | Sol / Medium |
