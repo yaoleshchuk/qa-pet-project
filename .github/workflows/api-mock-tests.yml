@@ -15,9 +15,6 @@ on:
         type: choice
         options: [all, acceptance, smoke, regression]
 
-env:
-  CYPRESS_INSTALL_BINARY: 0
-
 permissions:
   contents: read
 
@@ -25,6 +22,8 @@ jobs:
   api-tests:
     name: Real API suites against local mock
     runs-on: ubuntu-latest
+    env:
+      CYPRESS_INSTALL_BINARY: 0
 
     steps:
       - name: Checkout
@@ -128,8 +127,6 @@ jobs:
   cypress-api-tests:
     name: Cypress API shared suite against local mock
     runs-on: ubuntu-latest
-    env:
-      CYPRESS_INSTALL_BINARY: 1
 
     steps:
       - uses: actions/checkout@v4
