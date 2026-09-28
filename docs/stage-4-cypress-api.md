@@ -49,6 +49,21 @@ results; реальные API runs завершились exit 0.
 
 CI получает отдельный Cypress API job: он запускает общий Playwright/Cypress набор
 на local mock, сравнивает identities и сохраняет JSON, mock log и screenshots при
-падении. Remote result добавляется только после CI актуального draft PR head.
+падении.
+
+## Удалённые результаты
+
+Draft PR [#4](https://github.com/yaoleshchuk/qa-pet-project/pull/4). На implementation
+head `27c61b3d1afa3306637f9ff3fceb259927de5fa7` оба workflow завершились success:
+
+| Workflow | Run | Результат |
+| --- | --- | --- |
+| Static and Dry-run Quality Gate | [36479637359](https://github.com/yaoleshchuk/qa-pet-project/actions/runs/36479637359) | success |
+| Real API Tests - Mock Server | [36479637528](https://github.com/yaoleshchuk/qa-pet-project/actions/runs/36479637528) | success; `Real API suites` — 32 s, `Cypress API shared suite against local mock` — 1 m 1 s |
+
+Предыдущий head `54e193b` имел ожидаемо зафиксированную CI-конфигурационную ошибку:
+`CYPRESS_INSTALL_BINARY: 1` интерпретировался как запрос binary Cypress v1 и получил
+404. Минимальное исправление в `27c61b3` убрало это version override; зависимости не
+мигрировались. Локальные и удалённые результаты выше приведены раздельно.
 
 `@WIP` и UI остаются исключёнными: они не заявляются как Cypress API coverage.
