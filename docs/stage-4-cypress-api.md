@@ -12,6 +12,9 @@ steps. `scripts/compare-api-scenarios.js` сравнивает URI, развер
 смешивал API/UI discovery и не имел CRUD/negative steps, prerequisite или cleanup.
 Теперь state scenario-local в Cypress hook context; reviews/wishlist адресно
 очищаются в `After`, а UPDATE/DELETE подтверждаются отдельным GET в shared feature.
+Для отказавшего assertion Cypress использует одноразовый `fail`-handler с синхронным
+loopback DELETE: очередь Cypress отменяет обычные queued commands после failure,
+поэтому этот путь нужен именно для гарантии cleanup данных сценария.
 
 ## Локальные результаты
 
@@ -26,6 +29,23 @@ steps. `scripts/compare-api-scenarios.js` сравнивает URI, развер
 | real Cypress all API | 0 | 39 scenarios passed |
 | identity comparison | 0 | identical 39 executed scenarios |
 | Cypress `ai_reviews_ep.feature` | 0 | 15 passed |
+
+Дополнительные проверки выполнены на чистом task-owned mock `localhost:13021`.
+Временные control-features существовали только в ignored `reports/`/временной копии
+и не добавлялись в общий набор или в репозиторий.
+
+| Проверка | Playwright | Cypress | Результат |
+| --- | ---: | ---: | --- |
+| Контрольная ошибка ответа (`expected 599`) | 1 | 2 | оба runner-а обнаружили реальные `401` и `201`, а не приняли ошибочный expected status |
+| Cleanup после намеренно упавшего create-review assertion | 1 | 2 | последующий `GET /api/hotel/321/reviews` содержит только seed IDs `1,2,3` |
+| Самостоятельный общий сценарий `Get full info about hotel` | 0 | 0 | по одному passed scenario в каждом runner-е |
+| Переставленный порядок `reviews → details` | 0 | 0 | по два passed scenario в каждом runner-е |
+
+Финальный общий прогон выполнялся на новом чистом task-owned mock
+`localhost:13022`: Playwright — 39/127, Cypress — 39/39, identity comparison — 39.
+`npx --no-install tsc --noEmit` завершился с exit 0. На Apple Silicon Cypress 13.17.0
+печатал нефатальное предупреждение о x86 helper `term-size` и очистке предыдущих
+results; реальные API runs завершились exit 0.
 
 CI получает отдельный Cypress API job: он запускает общий Playwright/Cypress набор
 на local mock, сравнивает identities и сохраняет JSON, mock log и screenshots при

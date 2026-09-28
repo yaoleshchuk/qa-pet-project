@@ -77,6 +77,23 @@ function trackReview(context, hotelId, result) {
   scenario.reviewHotelId = hotelId;
 }
 
+function emergencyDelete(path) {
+  const xhr = new XMLHttpRequest();
+  xhr.open('DELETE', `${apiUrl()}${path}`, false);
+  xhr.send();
+  expect(xhr.status, `emergency cleanup ${path}`).to.be.oneOf([200, 204, 404]);
+}
+
+function emergencyCleanup(context) {
+  const scenario = context.apiState;
+  if (!scenario) return;
+  [...scenario.createdReviews.values()].reverse().forEach((item) => {
+    emergencyDelete(`/api/hotel/${item.hotelId}/reviews/${item.reviewId}`);
+    item.deletionRequested = true;
+  });
+  [...scenario.wishlistHotelIds].forEach((hotelId) => emergencyDelete(`/api/wishlist/${hotelId}`));
+}
+
 function createReview(context, hotelId, rating, comment) {
   return request(context, { method: 'POST', url: `/api/hotel/${hotelId}/reviews`, body: { rating, comment } })
     .then((result) => {
@@ -87,11 +104,22 @@ function createReview(context, hotelId, rating, comment) {
 
 Before({ tags: '@API' }, function () {
   this.apiState = { createdReviews: new Map(), wishlistHotelIds: new Set(), reviewId: undefined, reviewHotelId: undefined };
+  const failHandler = (error) => {
+    try {
+      emergencyCleanup(this);
+    } catch (cleanupError) {
+      error.message = `${error.message}\nEmergency cleanup failed: ${cleanupError.message}`;
+    }
+    throw error;
+  };
+  this.apiState.failHandler = failHandler;
+  Cypress.once('fail', failHandler);
 });
 
 After({ tags: '@API' }, function () {
   const scenario = this.apiState;
   if (!scenario) return;
+  Cypress.off('fail', scenario.failHandler);
   const reviewCleanup = [...scenario.createdReviews.values()].reverse().reduce(
     (chain, item) => chain.then(() => request(this, { method: 'DELETE', url: `/api/hotel/${item.hotelId}/reviews/${item.reviewId}` })
       .then((result) => expect(result.status, `cleanup review ${item.reviewId}`).to.be.oneOf(item.deletionRequested ? [204, 404] : [204]))),
