@@ -304,6 +304,8 @@ function createApp() {
     return res.status(200).json({ wishlist: [...wishlist] });
   });
 
+  app.get('/api/wishlist', (_req, res) => res.status(200).json({ wishlist: [...wishlist] }));
+
   app.delete('/api/wishlist/:id', (req, res) => {
     const id = parsePositiveId(req.params.id);
     if (!id) return apiError(res, 400, 'INVALID_ID', 'Hotel id must be a positive integer');

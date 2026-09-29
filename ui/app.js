@@ -2,6 +2,7 @@
   'use strict';
   const savedUser = sessionStorage.getItem('local-stays-user');
   const state = { results: [], wishlist: [], user: savedUser ? JSON.parse(savedUser) : null, query: null };
+  let latestSearch = 0;
   const $ = (id) => document.getElementById(id);
   const translations = { en: { title: 'Stays', city: 'City', checkin: 'Check-in', checkout: 'Check-out', guests: 'Guests', search: 'Search' }, es: { title: 'Alojamientos', city: 'Ciudad', checkin: 'Entrada', checkout: 'Salida', guests: 'Huéspedes', search: 'Buscar' }, de: { title: 'Unterkünfte', city: 'Stadt', checkin: 'Anreise', checkout: 'Abreise', guests: 'Gäste', search: 'Suchen' } };
 
@@ -37,6 +38,22 @@
   function renderFavorites() {
     const favorites = state.results.filter((hotel) => state.wishlist.includes(hotel.id)); $('favorites-results').replaceChildren(...favorites.map(card)); show('favorites-empty', favorites.length === 0);
   }
+  function renderSessionControls() {
+    show('logout', Boolean(state.user));
+    $('sign-in-link').hidden = Boolean(state.user);
+  }
+  async function loadFavorites() {
+    if (!state.user) { state.wishlist = []; renderFavorites(); return; }
+    try {
+      const [wishlist, hotels] = await Promise.all([
+        api('/api/wishlist'),
+        api(`/api/hotels?currency=${encodeURIComponent($('currency').value)}`),
+      ]);
+      state.wishlist = wishlist.wishlist;
+      state.results = hotels;
+      renderFavorites();
+    } catch (error) { message('results-error', error.message); }
+  }
   async function toggleWishlist(hotelId) {
     if (!state.user) { window.history.pushState({}, '', '/login'); renderRoute(); message('login-error', 'Sign in before saving a stay.'); return; }
     try {
@@ -48,12 +65,18 @@
     const city = $('city').value.trim(); const checkin = $('checkin').value; const checkout = $('checkout').value; const adults = Number($('adults').value);
     if (!city || !checkin || !checkout || !Number.isInteger(adults) || adults < 1 || adults > 30) return message('search-error', 'Enter a city, valid dates, and 1 to 30 guests.');
     if (checkout <= checkin) return message('search-error', 'Check-out must be later than check-in.');
-    message('search-error'); message('results-error'); show('loading', true); state.query = { city, checkin, checkout, adults };
+    const requestId = ++latestSearch;
+    message('search-error'); message('results-error'); show('loading', true); show('results', true); state.query = { city, checkin, checkout, adults };
     const params = new URLSearchParams({ city, checkin, checkout, currency: $('currency').value });
     const min = $('min-price').value; const max = $('max-price').value; if (min) params.set('min_price', min); if (max) params.set('max_price', max);
-    try { state.results = await api(`/api/hotels?${params}`); $('filters').hidden = false; window.history.pushState({}, '', `/searchresults.html?${params}`); renderResults(); }
-    catch (error) { state.results = []; renderResults(); message('results-error', error.message); }
-    finally { show('loading', false); }
+    try {
+      const hotels = await api(`/api/hotels?${params}`);
+      if (requestId !== latestSearch) return;
+      state.results = hotels; $('filters').hidden = false; window.history.pushState({}, '', `/searchresults.html?${params}`); renderResults();
+    } catch (error) {
+      if (requestId !== latestSearch) return;
+      state.results = []; renderResults(); message('results-error', error.message);
+    } finally { if (requestId === latestSearch) show('loading', false); }
   }
   function loadQueryFromUrl() {
     const params = new URLSearchParams(window.location.search); if (!params.get('city')) return;
@@ -63,7 +86,7 @@
     const path = window.location.pathname; ['search-view', 'filters', 'results', 'login-view', 'account-view', 'favorites-view', 'contact-view'].forEach((id) => show(id, false));
     if (path === '/login') return show('login-view', true);
     if (path === '/account') { show('account-view', true); $('account-greeting').textContent = state.user ? `Signed in as ${state.user.name} (${state.user.email})` : 'No active local session.'; return; }
-    if (path === '/favorites') { show('favorites-view', true); renderFavorites(); return; }
+    if (path === '/favorites') { show('favorites-view', true); loadFavorites(); return; }
     if (path === '/contact') return show('contact-view', true);
     show('search-view', true); show('results', state.query !== null); show('filters', state.query !== null); if (path === '/searchresults.html') loadQueryFromUrl();
   }
@@ -72,8 +95,9 @@
   $('apply-price').addEventListener('click', search);
   $('currency').addEventListener('change', () => { if (state.query) search(); });
   $('language').addEventListener('change', () => { const text = translations[$('language').value]; document.documentElement.lang = $('language').value; document.querySelectorAll('[data-i18n]').forEach((element) => { element.textContent = text[element.dataset.i18n]; }); });
-  $('login-form').addEventListener('submit', async (event) => { event.preventDefault(); const email = $('email').value.trim(); const password = $('password').value; if (!email || !password) return message('login-error', 'Email and password are required.'); try { const response = await api('/api/login', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email, password }) }); state.user = response.user; sessionStorage.setItem('local-stays-user', JSON.stringify(response.user)); message('login-error'); window.history.pushState({}, '', '/account'); renderRoute(); } catch (error) { message('login-error', error.message); } });
+  $('login-form').addEventListener('submit', async (event) => { event.preventDefault(); const email = $('email').value.trim(); const password = $('password').value; if (!email || !password) return message('login-error', 'Email and password are required.'); try { const response = await api('/api/login', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email, password }) }); state.user = response.user; sessionStorage.setItem('local-stays-user', JSON.stringify(response.user)); renderSessionControls(); message('login-error'); window.history.pushState({}, '', '/account'); renderRoute(); } catch (error) { message('login-error', error.message); } });
+  $('logout').addEventListener('click', () => { state.user = null; state.wishlist = []; sessionStorage.removeItem('local-stays-user'); renderSessionControls(); window.history.pushState({}, '', '/'); renderRoute(); });
   $('contact-form').addEventListener('submit', (event) => { event.preventDefault(); const valid = $('contact-name').value.trim() && $('contact-message').value.trim(); message('contact-error', valid ? '' : 'Name and message are required.'); });
   document.querySelectorAll('a[href^="/"]').forEach((link) => link.addEventListener('click', (event) => { event.preventDefault(); window.history.pushState({}, '', link.getAttribute('href')); renderRoute(); }));
-  window.addEventListener('popstate', renderRoute); renderRoute();
+  window.addEventListener('popstate', renderRoute); renderSessionControls(); renderRoute();
 })();

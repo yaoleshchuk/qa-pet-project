@@ -169,6 +169,15 @@ paths:
         '400': { $ref: '#/components/responses/InvalidId' }
         '404': { $ref: '#/components/responses/ReviewOrHotelNotFound' }
   /api/wishlist:
+    get:
+      summary: Read the current in-memory wishlist
+      operationId: getWishlist
+      responses:
+        '200':
+          description: Current wishlist. This teaching resource has no user ownership.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Wishlist' }
     post:
       summary: Add a hotel ID to the wishlist
       operationId: addWishlist
@@ -182,7 +191,11 @@ paths:
               properties:
                 hotel_id: { type: integer, minimum: 1 }
       responses:
-        '200': { description: Current wishlist. }
+        '200':
+          description: Current wishlist.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Wishlist' }
         '400': { $ref: '#/components/responses/InvalidId' }
   /api/wishlist/{hotelId}:
     delete:
@@ -191,7 +204,11 @@ paths:
       parameters:
         - { $ref: '#/components/parameters/HotelId' }
       responses:
-        '200': { description: Current wishlist. }
+        '200':
+          description: Current wishlist.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Wishlist' }
         '400': { $ref: '#/components/responses/InvalidId' }
   /api/test/reset:
     post:
@@ -256,6 +273,13 @@ components:
         user: { type: string }
         rating: { type: integer, minimum: 1, maximum: 5 }
         comment: { type: string, minLength: 1, maxLength: 500 }
+    Wishlist:
+      type: object
+      required: [wishlist]
+      properties:
+        wishlist:
+          type: array
+          items: { type: integer, minimum: 1 }
     CreateReview:
       type: object
       additionalProperties: false

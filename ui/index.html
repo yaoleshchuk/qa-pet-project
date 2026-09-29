@@ -12,7 +12,8 @@
       <a href="/" class="brand" data-testid="home-link">Local Stays</a>
       <nav aria-label="Primary navigation">
         <a href="/favorites" data-testid="favorites-link">Favourites</a>
-        <a href="/login" data-testid="sign-in-link">Sign in</a>
+        <a id="sign-in-link" href="/login" data-testid="sign-in-link">Sign in</a>
+        <button id="logout" type="button" hidden data-testid="logout-button">Sign out</button>
       </nav>
       <label>Language <select id="language" data-testid="header-language-picker-trigger" aria-label="Language"><option value="en">English</option><option value="es">Español</option><option value="de">Deutsch</option></select></label>
       <label>Currency <select id="currency" data-testid="header-currency-picker-trigger" aria-label="Currency"><option value="EUR">EUR</option><option value="USD">USD</option><option value="GBP">GBP</option></select></label>
@@ -24,9 +25,10 @@
           <div><label for="city" data-i18n="city">City</label><input id="city" name="city" autocomplete="address-level2" required data-testid="search-city"></div>
           <div><label for="checkin" data-i18n="checkin">Check-in</label><input id="checkin" name="checkin" type="date" required data-testid="search-checkin"></div>
           <div><label for="checkout" data-i18n="checkout">Check-out</label><input id="checkout" name="checkout" type="date" required data-testid="search-checkout"></div>
-          <div><label for="adults" data-i18n="guests">Guests</label><input id="adults" name="adults" type="number" min="1" max="30" value="2" required data-testid="search-adults"></div>
+          <div><label for="adults" data-i18n="guests">Guests</label><input id="adults" name="adults" type="number" min="1" max="30" value="2" required aria-describedby="guest-note" data-testid="search-adults"></div>
           <button type="submit" data-testid="search-submit" data-i18n="search">Search</button>
         </form>
+        <p id="guest-note">Guests are validated from 1 to 30 only. This teaching API does not model capacity, so guest count does not change availability.</p>
         <p id="search-error" role="alert" class="message error" hidden></p>
       </section>
       <section id="filters" hidden aria-label="Search filters">

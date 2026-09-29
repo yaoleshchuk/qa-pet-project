@@ -221,13 +221,15 @@ the received response. It never calculates exchange rates or availability in the
 browser.
 
 Test-only credentials are `testuser@example.com` / `correct_password`. A successful
-login is an in-memory teaching API response; the browser retains just the display
-user in `sessionStorage` for its tab. Wishlist state belongs to the running mock
-process and is not tied to an authenticated user. Restart the process, or run
+login stores only the display user in tab-scoped `sessionStorage`; **Sign out** clears
+that local display session. Wishlist state can be reloaded while signed in, but belongs
+to the running mock process and is not tied to an authenticated user. Restart the
+process, or run
 `curl -X POST http://localhost:3001/api/test/reset`, to restore the seed state.
-The UI validates 1–30 guests but the existing API has no guest-capacity parameter;
-it therefore does not claim per-hotel guest availability. Bookings, checkout and
-cancellation are intentionally not implemented.
+The search form visibly states that guests are validated only from 1 to 30: the
+existing API has no guest-capacity parameter, so this input does not change
+availability and the UI does not claim otherwise. Bookings, checkout and cancellation
+are intentionally not implemented.
 
 To use a different isolated port: `MOCK_PORT=13025 npm run ui:local`. Set
 `UI_READY_TIMEOUT_MS` (milliseconds) only when a longer readiness wait is needed.
