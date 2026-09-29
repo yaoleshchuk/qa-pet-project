@@ -80,10 +80,17 @@ Then('the hotel should be added to my favorites', () => {
   cy.get('[data-testid="favorites-link"]').click();
   cy.get('#favorites-results [data-testid="hotel-card"]').should('have.length', 1);
 });
-Then('prices should be displayed in {string}', (symbol) => cy.get('[data-testid="hotel-price"]').should(($prices) => {
+Then('prices should be displayed in {string}', (symbol) => {
+  const currency = { '$': 'USD', '€': 'EUR', '£': 'GBP' }[symbol];
+  cy.get('[data-testid="header-currency-picker-trigger"]').should('have.value', currency);
+  cy.get('[data-testid="hotel-price"]').should(($prices) => {
   expect($prices.length).to.be.greaterThan(0);
-  [...$prices].forEach((price) => expect(price.textContent).to.match(new RegExp(`^\\${symbol}`)));
-}));
+  [...$prices].forEach((price) => {
+    expect(price.textContent).to.match(new RegExp(`^\\${symbol}`));
+    expect(price.textContent).to.match(new RegExp(` ${currency}$`));
+  });
+  });
+});
 Then('the site should display text {string}', (text) => cy.contains(text, { matchCase: true }).should('be.visible'));
 Then('I should see validation errors for required fields', () => cy.get('#contact-error').should('be.visible'));
 Then('I should see an error message', () => cy.get('#login-error').should('be.visible'));

@@ -132,8 +132,10 @@ Then(/^the hotel should be added to my favorites$/, async () => {
 
 Then('prices should be displayed in {string}', async (symbol: string) => {
   const prices = await cards().locator('[data-testid="hotel-price"]').allTextContents();
+  const currency = ({ '$': 'USD', '€': 'EUR', '£': 'GBP' } as Record<string, string>)[symbol];
   expect(prices.length).toBeGreaterThan(0);
-  expect(prices.every((price) => price.startsWith(symbol))).toBe(true);
+  expect(await page.getByTestId('header-currency-picker-trigger').inputValue()).toBe(currency);
+  expect(prices.every((price) => price.startsWith(symbol) && price.endsWith(` ${currency}`))).toBe(true);
 });
 
 Then('the site should display text {string}', async (text: string) => {

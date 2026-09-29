@@ -44,14 +44,26 @@ Before(async function () {
 After(async function ({ result, pickle }) {
   const safeName = pickle.name.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '') || 'scenario';
   const artifactDirectory = path.join(process.env.UI_ARTIFACT_DIR || 'reports/ui/playwright', safeName);
-  if (result?.status === Status.FAILED) {
-    await fs.mkdir(artifactDirectory, { recursive: true });
-    await page?.screenshot({ path: path.join(artifactDirectory, 'failure.png'), fullPage: true });
-    await context?.tracing.stop({ path: path.join(artifactDirectory, 'trace.zip') });
-  } else {
-    await context?.tracing.stop();
+  try {
+    if (result?.status === Status.FAILED) {
+      await fs.mkdir(artifactDirectory, { recursive: true });
+      await page?.screenshot({ path: path.join(artifactDirectory, 'failure.png'), fullPage: true });
+      await context?.tracing.stop({ path: path.join(artifactDirectory, 'trace.zip') });
+    } else {
+      await context?.tracing.stop();
+    }
+  } catch (cleanupError) {
+    // Do not replace the original scenario failure with a diagnostics failure.
+    if (result?.status !== Status.FAILED) throw cleanupError;
+  } finally {
+    const closeErrors: unknown[] = [];
+    for (const resource of [page, context, browser]) {
+      try {
+        await resource?.close();
+      } catch (closeError) {
+        closeErrors.push(closeError);
+      }
+    }
+    if (result?.status !== Status.FAILED && closeErrors.length > 0) throw closeErrors[0];
   }
-  await page?.close();
-  await context?.close();
-  await browser?.close();
 });
