@@ -48,7 +48,7 @@
       </section>
       <section id="results" aria-label="Search results" data-testid="search-results"></section>
       <section id="login-view" hidden><h1>Sign in</h1><form id="login-form" novalidate><label for="email">Email</label><input id="email" type="email" autocomplete="email" required placeholder="Enter your email address" data-testid="login-email"><label for="password">Password</label><input id="password" type="password" autocomplete="current-password" required placeholder="Enter your password" data-testid="login-password"><button type="submit" data-testid="login-submit">Sign in</button><p id="login-error" role="alert" class="message error" hidden></p></form><p>Test account: <code>testuser@example.com</code> / <code>correct_password</code></p></section>
-      <section id="account-view" hidden><h1>Account</h1><p data-testid="account-greeting"></p></section>
+      <section id="account-view" hidden><h1>Account</h1><p id="account-greeting" data-testid="account-greeting"></p></section>
       <section id="favorites-view" hidden><h1>Favourites</h1><p id="favorites-empty">No saved stays yet.</p><div id="favorites-results"></div></section>
       <section id="contact-view" hidden><h1>Contact</h1><form id="contact-form" novalidate><label for="contact-name">Name</label><input id="contact-name" required><label for="contact-message">Message</label><textarea id="contact-message" required></textarea><button type="submit">Submit</button><p id="contact-error" role="alert" class="message error" hidden></p></form></section>
     </main>

@@ -28,7 +28,7 @@ Feature: Login – Equivalence Partitioning of Credentials
 
   # ── Valid partition ───────────────────────────────────────────────────────
 
-  @EP-Valid @Acceptance @Smoke
+  @EP-Valid @Acceptance @Smoke @LocalUI
   Scenario: Login with representative of valid credential partition succeeds
     Given I open the Booking.com homepage
     When I click on the "Sign in" button

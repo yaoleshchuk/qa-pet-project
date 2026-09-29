@@ -1,4 +1,4 @@
-@Acceptance @Smoke
+@Acceptance @Smoke @LocalUI
 # Priority: High
 Feature: Language Selection
 

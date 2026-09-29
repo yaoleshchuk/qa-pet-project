@@ -1,4 +1,4 @@
-@DecisionTable @Regression
+@DecisionTable @Regression @LocalUI
 # Technique: Decision Table Testing
 # Reference: ISTQB FL 4.4 – Decision Table Testing
 #

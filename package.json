@@ -17,6 +17,8 @@
     "test:pw:acceptance": "node scripts/validate-cucumber-profile.js acceptance",
     "test:pw:smoke": "node scripts/validate-cucumber-profile.js smoke",
     "test:pw:regression": "node scripts/validate-cucumber-profile.js regression",
+    "test:ui:playwright": "node scripts/run-local-ui-tests.js playwright",
+    "test:ui:cypress": "node scripts/run-local-ui-tests.js cypress",
     "lint:api-contract": "redocly lint docs/api-contract.yaml",
     "test:api:contract": "node --test tests/contract/api-contract.test.js",
     "test:api:all": "API_URL=http://localhost:3001 cucumber-js --profile api-all",

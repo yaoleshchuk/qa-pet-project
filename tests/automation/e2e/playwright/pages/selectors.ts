@@ -1,16 +1,18 @@
 import { Page } from '@playwright/test';
 
-export class BookingPage {
+export class LocalStaysPage {
   constructor(private page: Page) {}
 
   // Locators
-  get searchInput() { return this.page.locator('input[name="ss"]'); }
-  get signInButton() { return this.page.getByRole('button', { name: /sign in/i }); }
-  get continueButton() { return this.page.getByRole('button', { name: /continue/i }); }
-  get emailInput() { return this.page.getByPlaceholder('Enter your email address'); }
+  get cityInput() { return this.page.getByTestId('search-city'); }
+  get checkinInput() { return this.page.getByTestId('search-checkin'); }
+  get checkoutInput() { return this.page.getByTestId('search-checkout'); }
+  get adultsInput() { return this.page.getByTestId('search-adults'); }
+  get searchSubmit() { return this.page.getByTestId('search-submit'); }
+  get signInLink() { return this.page.getByTestId('sign-in-link'); }
+  get emailInput() { return this.page.getByTestId('login-email'); }
   get passwordInput() { return this.page.getByPlaceholder('Enter your password'); }
-  get wishlistButton() { return this.page.locator('[data-testid="wishlist-button"]'); }
-  get sortDropdown() { return this.page.locator('[data-testid="sorters-dropdown-trigger"]'); }
+  get cards() { return this.page.getByTestId('hotel-card'); }
 
   // Navigation
   async gotoHomePage() {
@@ -19,7 +21,7 @@ export class BookingPage {
 
   // Auth
   async clickSignIn() {
-    await this.signInButton.click();
+    await this.signInLink.click();
   }
 
   async clickButton(label: string) {
@@ -36,41 +38,43 @@ export class BookingPage {
 
   // Search
   async search(city: string, checkin: string, checkout: string, adults: string) {
-    const params = new URLSearchParams({
-      ss: city,
-      checkin,
-      checkout,
-      group_adults: adults,
-      no_rooms: '1',
-      group_children: '0',
-    });
-
-    // Navigating with explicit search parameters keeps the portfolio example
-    // deterministic and proves that every argument participates in the flow.
-    await this.page.goto(`/searchresults.html?${params.toString()}`);
+    await this.cityInput.fill(city);
+    await this.checkinInput.fill(checkin);
+    await this.checkoutInput.fill(checkout);
+    await this.adultsInput.fill(adults);
+    await this.searchSubmit.click();
   }
 
   async applyFilter(filterName: string) {
-    await this.page.getByText(filterName, { exact: false }).click();
+    const controls: Record<string, string> = {
+      'Free WiFi': 'filter-wifi',
+      'Breakfast included': 'filter-breakfast',
+      '5 stars': 'filter-stars',
+      '4 stars': 'filter-stars',
+      '3 stars': 'filter-stars',
+    };
+    const testId = controls[filterName];
+    if (!testId) throw new Error(`Unsupported local filter: ${filterName}`);
+    if (filterName.endsWith('stars')) await this.page.getByTestId(testId).selectOption(filterName[0]);
+    else await this.page.getByTestId(testId).check();
   }
 
   async sortBy(option: string) {
-    await this.sortDropdown.click();
-    await this.page.getByText(option, { exact: false }).click();
+    const value = option === 'Price (lowest first)' ? 'price-asc' : option === 'Price (highest first)' ? 'price-desc' : '';
+    await this.page.getByTestId('sorters-dropdown-trigger').selectOption(value);
   }
 
   // Language / Currency
   async selectLanguage(language: string) {
-    await this.page.getByTestId('header-language-picker-trigger').click();
-    await this.page.getByText(language, { exact: false }).click();
+    const values: Record<string, string> = { English: 'en', Español: 'es', Deutsch: 'de' };
+    await this.page.getByTestId('header-language-picker-trigger').selectOption(values[language]);
   }
 
   async selectCurrency(currency: string) {
-    await this.page.getByTestId('header-currency-picker-trigger').click();
-    await this.page.getByText(currency, { exact: false }).click();
+    await this.page.getByTestId('header-currency-picker-trigger').selectOption(currency);
   }
 
   async saveFirstHotel() {
-    await this.wishlistButton.first().click();
+    await this.cards.first().getByTestId('wishlist-button').click();
   }
 }

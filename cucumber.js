@@ -111,4 +111,17 @@ module.exports = {
       resultsDir: 'allure-results',
     },
   },
+
+  // ─── Real local UI execution (the strict profiles above remain dry-runs) ──
+  'ui-local': {
+    requireModule: ['ts-node/register'],
+    require: [
+      'tests/automation/e2e/fixtures/world.ts',
+      'tests/automation/e2e/playwright/steps/*.ts',
+    ],
+    paths: ['tests/manual/features/e2e/**/*.feature'],
+    tags: '@LocalUI and not @WIP',
+    format: ['progress-bar', 'summary'],
+    formatOptions: { snippetInterface: 'async-await' },
+  },
 };

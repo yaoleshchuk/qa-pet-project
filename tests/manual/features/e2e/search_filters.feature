@@ -1,4 +1,4 @@
-@Acceptance @Regression
+@Acceptance @Regression @LocalUI
 # Priority: Medium
 Feature: Search Filters
 
