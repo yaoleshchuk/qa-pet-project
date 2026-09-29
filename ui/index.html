@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Local stays teaching UI</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to results</a>
+    <header class="site-header">
+      <a href="/" class="brand" data-testid="home-link">Local Stays</a>
+      <nav aria-label="Primary navigation">
+        <a href="/favorites" data-testid="favorites-link">Favourites</a>
+        <a id="sign-in-link" href="/login" data-testid="sign-in-link">Sign in</a>
+        <button id="logout" type="button" hidden data-testid="logout-button">Sign out</button>
+      </nav>
+      <label>Language <select id="language" data-testid="header-language-picker-trigger" aria-label="Language"><option value="en">English</option><option value="es">Español</option><option value="de">Deutsch</option></select></label>
+      <label>Currency <select id="currency" data-testid="header-currency-picker-trigger" aria-label="Currency"><option value="EUR">EUR</option><option value="USD">USD</option><option value="GBP">GBP</option></select></label>
+    </header>
+    <main id="main" tabindex="-1">
+      <section id="search-view">
+        <h1 data-i18n="title">Stays</h1>
+        <form id="search-form" novalidate data-testid="search-form">
+          <div><label for="city" data-i18n="city">City</label><input id="city" name="city" autocomplete="address-level2" required data-testid="search-city"></div>
+          <div><label for="checkin" data-i18n="checkin">Check-in</label><input id="checkin" name="checkin" type="date" required data-testid="search-checkin"></div>
+          <div><label for="checkout" data-i18n="checkout">Check-out</label><input id="checkout" name="checkout" type="date" required data-testid="search-checkout"></div>
+          <div><label for="adults" data-i18n="guests">Guests</label><input id="adults" name="adults" type="number" min="1" max="30" value="2" required aria-describedby="guest-note" data-testid="search-adults"></div>
+          <button type="submit" data-testid="search-submit" data-i18n="search">Search</button>
+        </form>
+        <p id="guest-note">Guests are validated from 1 to 30 only. This teaching API does not model capacity, so guest count does not change availability.</p>
+        <p id="search-error" role="alert" class="message error" hidden></p>
+      </section>
+      <section id="filters" hidden aria-label="Search filters">
+        <h2>Filters and sort</h2>
+        <label><input id="filter-wifi" type="checkbox" data-testid="filter-wifi"> Free WiFi</label>
+        <label><input id="filter-breakfast" type="checkbox" data-testid="filter-breakfast"> Breakfast included</label>
+        <label for="filter-stars">Stars <select id="filter-stars" data-testid="filter-stars"><option value="">Any</option><option value="5">5 stars</option><option value="4">4 stars</option><option value="3">3 stars</option></select></label>
+        <label for="min-price">Minimum price <input id="min-price" type="number" min="0" step="0.01" data-testid="filter-min-price"></label>
+        <label for="max-price">Maximum price <input id="max-price" type="number" min="0" step="0.01" data-testid="filter-max-price"></label>
+        <button id="apply-price" type="button" data-testid="apply-price-filter">Apply price range</button>
+        <label for="sort">Sort <select id="sort" data-testid="sorters-dropdown-trigger"><option value="">Recommended</option><option value="price-asc">Price (lowest first)</option><option value="price-desc">Price (highest first)</option></select></label>
+      </section>
+      <section aria-live="polite" aria-atomic="true">
+        <p id="loading" hidden>Loading results…</p>
+        <p id="results-error" role="alert" class="message error" hidden></p>
+        <p id="empty" hidden data-testid="empty-results">No stays match this search.</p>
+      </section>
+      <section id="results" aria-label="Search results" data-testid="search-results"></section>
+      <section id="login-view" hidden><h1>Sign in</h1><form id="login-form" novalidate><label for="email">Email</label><input id="email" type="email" autocomplete="email" required placeholder="Enter your email address" data-testid="login-email"><label for="password">Password</label><input id="password" type="password" autocomplete="current-password" required placeholder="Enter your password" data-testid="login-password"><button type="submit" data-testid="login-submit">Sign in</button><p id="login-error" role="alert" class="message error" hidden></p></form><p>Test account: <code>testuser@example.com</code> / <code>correct_password</code></p></section>
+      <section id="account-view" hidden><h1>Account</h1><p data-testid="account-greeting"></p></section>
+      <section id="favorites-view" hidden><h1>Favourites</h1><p id="favorites-empty">No saved stays yet.</p><div id="favorites-results"></div></section>
+      <section id="contact-view" hidden><h1>Contact</h1><form id="contact-form" novalidate><label for="contact-name">Name</label><input id="contact-name" required><label for="contact-message">Message</label><textarea id="contact-message" required></textarea><button type="submit">Submit</button><p id="contact-error" role="alert" class="message error" hidden></p></form></section>
+    </main>
+    <script src="/app.js"></script>
+  </body>
+</html>

@@ -2,6 +2,7 @@
 'use strict';
 
 const express = require('express');
+const path = require('path');
 
 const DEFAULT_PORT = 3001;
 const CURRENCY_RATES = Object.freeze({ EUR: 1, USD: 1.1, GBP: 0.85 });
@@ -303,11 +304,22 @@ function createApp() {
     return res.status(200).json({ wishlist: [...wishlist] });
   });
 
+  app.get('/api/wishlist', (_req, res) => res.status(200).json({ wishlist: [...wishlist] }));
+
   app.delete('/api/wishlist/:id', (req, res) => {
     const id = parsePositiveId(req.params.id);
     if (!id) return apiError(res, 400, 'INVALID_ID', 'Hotel id must be a positive integer');
     wishlist = wishlist.filter((hotelId) => hotelId !== id);
     return res.status(200).json({ wishlist: [...wishlist] });
+  });
+
+  // The teaching UI deliberately shares this origin with the mock API.  This
+  // keeps the browser exercise fully local and avoids a second development
+  // server, CORS configuration, or an external Booking.com dependency.
+  const uiDirectory = path.join(__dirname, '..', 'ui');
+  app.use(express.static(uiDirectory));
+  app.get(['/', '/searchresults.html', '/login', '/account', '/favorites', '/contact'], (_req, res) => {
+    res.sendFile(path.join(uiDirectory, 'index.html'));
   });
 
   app.use((req, res) => apiError(res, 404, 'ROUTE_NOT_FOUND', 'Route not found'));

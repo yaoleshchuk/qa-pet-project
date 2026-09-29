@@ -176,10 +176,13 @@ test('fixed rates recalculate numeric prices and price filters use requested cur
 });
 
 test('reset restores seed reviews, wishlist, and deterministic review ids', async () => {
+  const emptyWishlist = await json(await request('/api/wishlist'));
+  assert.deepEqual(emptyWishlist.wishlist, []);
   const wishlistBeforeReset = await json(await request('/api/wishlist', {
     method: 'POST', body: JSON.stringify({ hotel_id: 123 }),
   }));
   assert.deepEqual(wishlistBeforeReset.wishlist, [123]);
+  assert.deepEqual((await json(await request('/api/wishlist'))).wishlist, [123]);
   assert.equal((await request('/api/hotel/321/reviews/1', { method: 'DELETE' })).status, 204);
   const firstCreated = await json(await request('/api/hotel/321/reviews', {
     method: 'POST', body: JSON.stringify({ rating: 4, comment: 'temporary' }),
@@ -193,6 +196,7 @@ test('reset restores seed reviews, wishlist, and deterministic review ids', asyn
     method: 'POST', body: JSON.stringify({ hotel_id: 456 }),
   }));
   assert.deepEqual(wishlistAfterReset.wishlist, [456]);
+  assert.deepEqual((await json(await request('/api/wishlist'))).wishlist, [456]);
   const createdAfterReset = await json(await request('/api/hotel/321/reviews', {
     method: 'POST', body: JSON.stringify({ rating: 4, comment: 'after reset' }),
   }));

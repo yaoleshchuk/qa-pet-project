@@ -1,0 +1,14 @@
+:root { font-family: system-ui, sans-serif; color: #18212f; background: #f5f7fb; }
+body { margin: 0; }
+[hidden] { display: none !important; }
+.site-header { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; padding: 1rem 5vw; color: white; background: #003b6f; }
+.site-header a { color: white; } .brand { font-weight: 700; font-size: 1.2rem; margin-right: auto; }
+main { max-width: 1050px; margin: 2rem auto; padding: 0 1rem; }
+form, #filters { display: flex; gap: .8rem; align-items: end; flex-wrap: wrap; padding: 1rem; background: white; border-radius: .5rem; box-shadow: 0 1px 4px #001b3320; }
+form div, form > label, #filters > label { display: grid; gap: .25rem; }
+input, select, textarea, button { font: inherit; padding: .45rem; } button { cursor: pointer; border: 0; border-radius: .25rem; color: white; background: #0071c2; } button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible { outline: 3px solid #feba02; outline-offset: 2px; }
+#results, #favorites-results { display: grid; gap: 1rem; margin-top: 1rem; }
+.hotel { background: white; padding: 1rem; border-radius: .5rem; box-shadow: 0 1px 4px #001b3320; display: grid; gap: .45rem; }
+.hotel h3 { margin: 0; } .price { font-weight: 700; font-size: 1.15rem; } .amenities { padding: 0; margin: 0; list-style: none; display: flex; gap: .45rem; flex-wrap: wrap; } .amenities li { background: #e4f1fb; padding: .2rem .45rem; border-radius: 1rem; }
+.message { margin-top: .8rem; padding: .7rem; } .error { color: #a30000; background: #ffe7e7; } .skip-link { position: absolute; left: -10000px; } .skip-link:focus { left: 1rem; top: 1rem; z-index: 3; background: white; padding: .5rem; }
+@media (max-width: 600px) { .site-header { align-items: flex-start; flex-direction: column; } .brand { margin-right: 0; } }

@@ -8,9 +8,10 @@
 A portfolio-focused **QA automation project** modelled on [Booking.com](https://booking.com), using Gherkin BDD, Playwright (TypeScript), Cypress (JavaScript), and GitHub Actions CI/CD.
 
 > **Execution model:** the mock API suite is deterministic and runs for real.
-> UI suites are primarily specifications and step-contract checks against a
-> live third-party website. Experimental scenarios remain visible under `@WIP`
-> but are deliberately excluded from quality gates.
+> The local teaching UI and mock API run together for manual browser checks.
+> Existing UI automation is still specification/step-contract coverage; its full
+> migration to the local stand is deliberately deferred to stage 6. Experimental
+> scenarios remain visible under `@WIP` but are deliberately excluded from quality gates.
 
 ---
 
@@ -204,9 +205,40 @@ npm run allure:open
 > The mock server simulates all Booking.com API endpoints with realistic seed
 > data, enabling fully deterministic test results without network access.
 
-### Cypress UI
+### Local teaching UI + mock API (manual browser exercise)
 
-These commands exercise the live UI and are intentionally non-blocking for CI:
+```bash
+# Starts one process on http://localhost:3001, waits up to 10 seconds for
+# /health, and forwards Ctrl-C/SIGTERM to stop the process cleanly.
+npm run ui:local
+```
+
+Open `http://localhost:3001`. The UI has accessible labels and stable
+`data-testid` values for the stage-6 automation work. It searches city/dates and
+guests, receives availability, price ranges, and converted currencies from the
+mock API, and provides client-side amenity/star filters and numeric price sort on
+the received response. It never calculates exchange rates or availability in the
+browser.
+
+Test-only credentials are `testuser@example.com` / `correct_password`. A successful
+login stores only the display user in tab-scoped `sessionStorage`; **Sign out** clears
+that local display session. Wishlist state can be reloaded while signed in, but belongs
+to the running mock process and is not tied to an authenticated user. Restart the
+process, or run
+`curl -X POST http://localhost:3001/api/test/reset`, to restore the seed state.
+The search form visibly states that guests are validated only from 1 to 30: the
+existing API has no guest-capacity parameter, so this input does not change
+availability and the UI does not claim otherwise. Bookings, checkout and cancellation
+are intentionally not implemented.
+
+To use a different isolated port: `MOCK_PORT=13025 npm run ui:local`. Set
+`UI_READY_TIMEOUT_MS` (milliseconds) only when a longer readiness wait is needed.
+
+### Existing Cypress UI specifications
+
+These legacy commands exercise the configured UI base and are intentionally
+non-blocking for CI; they are not evidence that the local stand has browser
+automation yet:
 
 ```bash
 # Interactive runner
