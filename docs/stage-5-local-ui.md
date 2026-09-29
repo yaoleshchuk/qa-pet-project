@@ -67,8 +67,13 @@ login и add/remove; screenshots не являются UI-автоматизац
 ### Границы проверок
 
 - **Ручная browser-проверка:** выполнена локально в Chrome против `localhost:13025`.
-- **Удалённый CI:** ещё не запускался для этого commit/PR; его результат будет
-  зафиксирован после публикации draft PR.
+- **Удалённый CI:** draft PR #5 проверен на implementation head
+  `af670ad0c458ab06b5e4013cc679429ebec994ed`. [Static and Dry-run Quality
+  Gate](https://github.com/yaoleshchuk/qa-pet-project/actions/runs/36562236310)
+  завершился `success`; [Real API Tests - Mock
+  Server](https://github.com/yaoleshchuk/qa-pet-project/actions/runs/36562236433)
+  завершился `success`, включая real API suites и общий Cypress/Playwright API job.
+  Pages publish job пропущен для pull request, как и задумано.
 - **UI-автоматизация:** не добавлялась и не запускалась. Это задача этапа 6;
   `@WIP` не изменялся.
 
