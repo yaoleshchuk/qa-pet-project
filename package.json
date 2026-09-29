@@ -10,6 +10,8 @@
   "packageManager": "npm@10.9.8",
   "scripts": {
     "mock:start": "node mock-server/server.js",
+    "ui:start": "node mock-server/server.js",
+    "ui:local": "node scripts/run-local-ui.js",
     "typecheck": "tsc --noEmit",
     "test:pw:dry-run": "node scripts/validate-cucumber-profile.js default",
     "test:pw:acceptance": "node scripts/validate-cucumber-profile.js acceptance",
