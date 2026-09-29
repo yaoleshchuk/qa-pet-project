@@ -15,9 +15,6 @@ on:
         type: choice
         options: [all, acceptance, smoke, regression]
 
-env:
-  CYPRESS_INSTALL_BINARY: 0
-
 permissions:
   contents: read
 
@@ -25,6 +22,8 @@ jobs:
   api-tests:
     name: Real API suites against local mock
     runs-on: ubuntu-latest
+    env:
+      CYPRESS_INSTALL_BINARY: 0
 
     steps:
       - name: Checkout
@@ -124,6 +123,63 @@ jobs:
           name: allure-report-${{ github.run_number }}
           path: reports/allure-report/
           if-no-files-found: error
+
+  cypress-api-tests:
+    name: Cypress API shared suite against local mock
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: npm
+      - name: Install locked dependencies and Cypress binary
+        run: npm ci
+      - name: Run the shared Playwright and Cypress API scenarios
+        run: |
+          rm -rf reports/cypress-api
+          mkdir -p reports/cypress-api
+          node mock-server/server.js > reports/cypress-api/mock.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true; wait "$server_pid" 2>/dev/null || true' EXIT
+
+          for attempt in $(seq 1 15); do
+            if curl --fail --silent http://localhost:3001/health > /dev/null; then
+              break
+            fi
+            if [ "$attempt" -eq 15 ]; then
+              echo 'Mock server was not ready after 15 seconds.'
+              cat reports/cypress-api/mock.log
+              exit 1
+            fi
+            sleep 1
+          done
+
+          set +e
+          API_URL=http://localhost:3001 npx --no-install cucumber-js --profile api-all \
+            --format summary --format json:reports/cypress-api/playwright-api.json \
+            --format-options '{"resultsDir":"reports/cypress-api/allure-playwright"}'
+          playwright_exit=$?
+          npm run test:cypress:api:all
+          cypress_exit=$?
+          node scripts/compare-api-scenarios.js \
+            reports/cypress-api/playwright-api.json reports/cypress-api/cucumber.json
+          comparison_exit=$?
+          set -e
+
+          printf 'playwright=%s\ncypress=%s\ncomparison=%s\n' \
+            "$playwright_exit" "$cypress_exit" "$comparison_exit" | tee reports/cypress-api/status.txt
+          test "$playwright_exit" -eq 0 && test "$cypress_exit" -eq 0 && test "$comparison_exit" -eq 0
+      - name: Upload Cypress API diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-api-results-${{ github.run_number }}
+          path: |
+            reports/cypress-api/
+            cypress/screenshots/
+          if-no-files-found: warn
 
   deploy-pages:
     name: Publish latest Allure report to Pages
