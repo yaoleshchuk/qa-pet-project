@@ -1,4 +1,4 @@
-@Regression
+@Regression @LocalUI
 # Priority: Low
 Feature: Contact Form Validation
 

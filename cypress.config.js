@@ -12,7 +12,9 @@ async function setupNodeEvents(on, config) {
 
 module.exports = defineConfig({
   e2e: {
-    baseUrl: process.env.BASE_URL || 'https://www.booking.com',
+    // Local is intentional: these feature implementations must never open the
+    // external site. Real UI commands start this origin themselves.
+    baseUrl: process.env.BASE_URL || 'http://localhost:3001',
     specPattern: 'tests/manual/features/e2e/**/*.feature',
     supportFile: false,
     viewportWidth: 1280,

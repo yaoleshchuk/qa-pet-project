@@ -1,4 +1,4 @@
-@Regression @Smoke
+@Regression @Smoke @LocalUI
 # Priority: High
 Feature: Invalid Login Handling
 

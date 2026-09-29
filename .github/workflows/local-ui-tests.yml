@@ -1,0 +1,57 @@
+name: Real Local UI Tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  playwright-ui:
+    name: Playwright UI against isolated local mock
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Install Playwright Chromium
+        run: npx --no-install playwright install --with-deps chromium
+      - name: Run supported local UI scenarios
+        run: npm run test:ui:playwright
+      - name: Upload Playwright UI diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-ui-diagnostics-${{ github.run_number }}
+          path: reports/ui/playwright/
+          if-no-files-found: warn
+
+  cypress-ui:
+    name: Cypress UI against isolated local mock
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: npm
+      - name: Install locked dependencies and Cypress binary
+        run: npm ci
+      - name: Run supported local UI scenarios
+        run: npm run test:ui:cypress
+      - name: Upload Cypress UI diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-ui-diagnostics-${{ github.run_number }}
+          path: |
+            reports/ui/cypress/
+            cypress/screenshots/
+          if-no-files-found: warn
