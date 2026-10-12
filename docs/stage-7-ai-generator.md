@@ -20,7 +20,7 @@
   Примеры используют фиксированные dates, не зависящие от текущего года. В этом этапе
   внешний AI API **не вызывался**.
 
-## Адресная проверка
+## Локальная проверка
 
 В Node `22.23.2` / npm `10.9.8`, после `npm ci --offline`:
 
@@ -33,6 +33,16 @@
 Mock режим работает без `ANTHROPIC_API_KEY`. Тест валидного черновика подтвердил tags
 и matching; временные черновики тестов удалены. Это не тест реального provider и не
 доказательство семантической правильности результата.
+
+## Удалённая проверка и CI
+
+Планируемый quality gate `Static and Dry-run Quality Gate` теперь запускает
+`npm run test:ai-generator` после typecheck; этим проверяется generator mock workflow
+на каждом pull request. На момент фиксации этого evidence удалённые проверки **не
+запускались**: обычный HTTPS push не смог получить credential (`Device not configured`),
+а указанный isolated `GH_CONFIG_DIR` не содержал GitHub host configuration. Поэтому
+draft PR, remote head и CI result отсутствуют и не заявляются как успешные. Внешний
+AI-вызов Claude также не выполнялся.
 
 ## Перевод черновика
 
