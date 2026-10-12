@@ -32,12 +32,13 @@ A portfolio-focused **QA automation project** modelled on [Booking.com](https://
 
 ```
 scripts/
-└── ai-generate-feature.ts           # AI feature generator (Claude API)
+├── ai-generate-feature.ts           # AI feature generator (Claude API or offline mock)
+└── validate-generated-draft.js      # parser + explicit dry-run step matching
 
 tests/
 ├── manual/
 │   └── features/
-│       ├── api/                     # 11 API feature files + AI-generated
+│       ├── api/                     # executable API specifications
 │       │   ├── 01_login_success.feature
 │       │   ├── 02_login_failure.feature
 │       │   ├── 03_search_city.feature
@@ -50,7 +51,7 @@ tests/
 │       │   ├── 10_get_reviews.feature
 │       │   ├── 11_hotel_review_crud.feature   ← Full CRUD lifecycle
 │       │   └── ai_reviews_ep.feature          ← 🤖 AI-generated (EP)
-│       └── e2e/                     # 10 UI feature files + AI-generated
+│       ├── e2e/                     # UI specifications
 │           ├── booking.feature
 │           ├── language_switch.feature
 │           ├── currency_switch.feature
@@ -64,6 +65,7 @@ tests/
 │           ├── ai_price_filter_currency_switch.feature ← 🤖 AI-generated (Decision Table, WIP)
 │           ├── ai_wishlist_state_transition.feature    ← 🤖 AI-generated (State Transition, WIP)
 │           └── ai_guest_count_bva.feature              ← 🤖 AI-generated (BVA, WIP)
+│       └── drafts/{api,e2e}/         # new generated drafts, always @WIP
 └── automation/
     ├── api/
     │   ├── playwright/              # Playwright API step definitions (TS)
@@ -371,9 +373,11 @@ You describe what to test
         ↓
 CLI asks: test type, tags, test design technique
         ↓
-Claude API generates a draft Gherkin feature tagged @WIP
+Claude API generates a draft Gherkin feature tagged @WIP + @API/@E2E
         ↓
-File is saved to tests/manual/features/{e2e|api}/ for review and automation
+It is saved under tests/manual/features/drafts/{e2e|api}/
+        ↓
+Gherkin is parsed and that exact @WIP draft is dry-run matched to steps
 ```
 
 ### Setup
@@ -390,6 +394,13 @@ Get a key at [console.anthropic.com](https://console.anthropic.com).
 
 ```bash
 npm run ai:generate
+
+# Offline, without ANTHROPIC_API_KEY and without an external request
+npm run ai:generate:mock
+
+# Reproducible non-interactive mock example
+npx ts-node --project tsconfig.json scripts/ai-generate-feature.ts --mock --non-interactive \
+  --description "login response" --type api
 ```
 
 Example session:
@@ -411,8 +422,25 @@ Example session:
      → tests/manual/features/e2e/decision_table_hotel_price_filter_with_currency_switch.feature
 ```
 
-Generated files always start with `@WIP`. Remove the tag only after the steps
-are implemented and the relevant dry-run profile passes.
+Generated files always have `@WIP`, `@GeneratedDraft`, and exactly one type tag:
+`@API` or `@E2E`. They live in `tests/manual/features/drafts/`, are excluded from
+ordinary profiles, and never receive `@LocalUI` automatically. The generator gives
+the provider the local mock API contract (for API drafts), local-UI limitations, and
+the supported step wording. Its examples use fixed fixture-friendly dates, not a
+specific current year.
+
+The validation parses Gherkin first, then explicitly selects the generated
+`@WIP` draft in Cucumber dry-run mode and requires at least one selected scenario
+with no undefined or ambiguous steps. It does not execute steps or launch a browser.
+Passing it only proves syntax and step matching, not that the scenario is meaningful
+or that the system behaves correctly.
+
+To promote a draft: review its intent against the contract and supported product
+model; implement or confirm the required assertions and steps; run the relevant
+scenario for real against the local mock/local UI; then move it into the appropriate
+working feature directory, remove `@WIP` and `@GeneratedDraft`, and add `@LocalUI`
+only after local-UI support was verified. Finally run the affected normal suite.
+Never promote a draft based only on generator validation.
 
 ---
 
