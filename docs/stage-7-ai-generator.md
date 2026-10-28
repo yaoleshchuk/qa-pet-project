@@ -36,13 +36,21 @@ Mock режим работает без `ANTHROPIC_API_KEY`. Тест валид
 
 ## Удалённая проверка и CI
 
-Планируемый quality gate `Static and Dry-run Quality Gate` теперь запускает
-`npm run test:ai-generator` после typecheck; этим проверяется generator mock workflow
-на каждом pull request. На момент фиксации этого evidence удалённые проверки **не
-запускались**: обычный HTTPS push не смог получить credential (`Device not configured`),
-а указанный isolated `GH_CONFIG_DIR` не содержал GitHub host configuration. Поэтому
-draft PR, remote head и CI result отсутствуют и не заявляются как успешные. Внешний
-AI-вызов Claude также не выполнялся.
+Quality gate `Static and Dry-run Quality Gate` запускает `npm run test:ai-generator`
+после typecheck; этим проверяется generator mock workflow на каждом pull request.
+На draft PR #7 для head `210617e8d7cb86771840355649435a64a48b7650` завершились:
+
+| Workflow / check | Result |
+| --- | --- |
+| Typecheck automation and generator | pass, 33s |
+| Strict dry-run: default / acceptance / smoke / regression | pass, 21s / 19s / 19s / 18s |
+| Real API suites / Cypress API shared suite | pass, 47s / 1m03s |
+| Playwright UI / Cypress UI | pass, 58s / 1m35s |
+| Publish latest Allure report to Pages | skipped as expected for a pull request |
+
+This remote result verifies the current CI workflow, including the mock generator
+test; it does not call the external Claude provider. A later documentation-only head
+must be checked independently before this PR is ready to merge.
 
 ## Перевод черновика
 
