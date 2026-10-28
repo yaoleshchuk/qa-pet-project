@@ -1,28 +1,5 @@
 #!/usr/bin/env bash
-# ─────────────────────────────────────────────────────────────────────────────
-# Test:     Price Range Filter (100–300 per night)
-# Endpoint: GET /api/hotels?city=Paris&min_price=100&max_price=300
-# Expected: HTTP 200, every hotel price within [100, 300]
-# ─────────────────────────────────────────────────────────────────────────────
-set -euo pipefail
-
-BASE_URL="${BASE_URL:-https://api.booking.com}"
-MIN=100; MAX=300
-
-echo "▶ GET ${BASE_URL}/api/hotels?city=Paris&min_price=${MIN}&max_price=${MAX}"
-
-response=$(curl -s -w "\n%{http_code}" \
-  -H "Accept: application/json" \
-  "${BASE_URL}/api/hotels?city=Paris&min_price=${MIN}&max_price=${MAX}")
-
-http_code=$(echo "$response" | tail -n1)
-body=$(echo "$response" | sed '$d')
-
-echo "  Status : ${http_code}"
-
-if [ "$http_code" -ne 200 ]; then
-  echo "❌ FAIL – expected 200, got ${http_code}" >&2; exit 1
-fi
-
-echo "✅ PASS – price-filtered results returned (${MIN}–${MAX} range)"
-echo "  Body preview: ${body:0:120}..."
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/common.bash"
+MIN="${1:-100}"; MAX="${2:-300}"; reset_mock; request GET "/api/hotels?city=Paris&min_price=${MIN}&max_price=${MAX}"; expect_status 200
+MIN_PRICE="$MIN" MAX_PRICE="$MAX" json_assert "Array.isArray(data) && data.length > 0 && data.every((hotel) => typeof hotel.price === 'number' && hotel.price >= Number(process.env.MIN_PRICE) && hotel.price <= Number(process.env.MAX_PRICE))" 'every returned price must be inside the requested range'
+echo "PASS: price filter ($MIN-$MAX)"

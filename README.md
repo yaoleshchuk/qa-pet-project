@@ -9,8 +9,8 @@ A portfolio-focused **QA automation project** modelled on [Booking.com](https://
 
 > **Execution model:** the mock API suite is deterministic and runs for real.
 > The local teaching UI and mock API run together for manual browser checks.
-> Existing UI automation is still specification/step-contract coverage; its full
-> migration to the local stand is deliberately deferred to stage 6. Experimental
+> Supported UI automation runs for real against the local teaching stand; it never
+> visits Booking.com. Experimental
 > scenarios remain visible under `@WIP` but are deliberately excluded from quality gates.
 
 ---
@@ -22,7 +22,7 @@ A portfolio-focused **QA automation project** modelled on [Booking.com](https://
 | Test design & specification | **Gherkin / Cucumber** | — |
 | E2E & API automation | **Playwright** | TypeScript |
 | E2E & API automation | **Cypress** | JavaScript |
-| DB-level validation | **SQL** | PostgreSQL |
+| SQL learning examples (not DB tests) | **SQL** | PostgreSQL syntax |
 | Lightweight API checks | **cURL** | Bash |
 | CI/CD quality gates | **GitHub Actions** | YAML |
 
@@ -155,20 +155,9 @@ See [the stage 0 baseline](docs/baseline-stage-0.md) for the historical baseline
 and [the stage 1 integration evidence](docs/stage-1-integration.md) for checks against
 the current PR base.
 
-### Configure environment
-
-```bash
-cp .env.example .env
-```
-
-Edit `.env` with your test credentials (use a dedicated test account):
-
-```env
-BASE_URL=https://www.booking.com
-API_URL=https://www.booking.com
-TEST_USER_EMAIL=your@email.com
-TEST_USER_PASSWORD=yourpassword
-```
+No `.env`, credentials, external service, global `jq`, or global Allure install is
+needed for the supported local commands. `npx --no-install` and npm scripts use the
+locked project dependencies. Do not point mock API commands at Booking.com.
 
 ---
 
@@ -204,6 +193,17 @@ npm run allure:generate
 npm run allure:open
 ```
 
+Wait for readiness before another terminal runs a command:
+
+```bash
+curl --fail --silent http://127.0.0.1:3001/health
+```
+
+Stop only the `npm run mock:start` process started for this task with `Ctrl-C`.
+Each `test:api:*` run first removes `reports/api/latest/`, then writes its JSON and
+Allure results there. Thus `allure:generate` always consumes one current real run,
+never an old top-level `allure-results/` directory.
+
 > The mock server simulates all Booking.com API endpoints with realistic seed
 > data, enabling fully deterministic test results without network access.
 
@@ -236,25 +236,22 @@ are intentionally not implemented.
 To use a different isolated port: `MOCK_PORT=13025 npm run ui:local`. Set
 `UI_READY_TIMEOUT_MS` (milliseconds) only when a longer readiness wait is needed.
 
-### Existing Cypress UI specifications
+### Real local UI automation
 
-These legacy commands exercise the configured UI base and are intentionally
-non-blocking for CI; they are not evidence that the local stand has browser
-automation yet:
+These commands start their own local mock, wait for `/health`, and stop only that
+child process. They need the Chromium install from Setup; do not start another server.
 
 ```bash
-# Interactive runner
-npm run test:cypress:open
-
-# Headless
-npm run test:cypress:run
-npm run test:cypress:acceptance
-npm run test:cypress:smoke
+npm run test:ui:playwright
+npm run test:ui:cypress
 ```
+
+The generic legacy Cypress commands remain configuration-level commands and are not
+coverage evidence for the teaching model; use the two commands above for real UI runs.
 
 ### Cypress API against the local mock
 
-Start `npm run mock:start` in a separate terminal, then run one of the API-only
+Start `npm run mock:start`, verify `/health` as above, then run one of the API-only
 commands below. They use `cypress.api.config.js`, load only shared `@API` Gherkin
 features, and reject a non-local API URL; they never visit Booking.com.
 
@@ -268,14 +265,37 @@ npm run test:cypress:api:regression
 ### cURL scripts (lightweight API smoke checks)
 
 ```bash
-# Run a single script
-BASE_URL=http://localhost:3001 bash tests/automation/api/curl/01_login_success.sh
-
-# Run all scripts
-for f in tests/automation/api/curl/*.sh; do
-  BASE_URL=http://localhost:3001 bash "$f" && echo
-done
+# Starts a private mock on 127.0.0.1:3218, waits for /health, runs all ten
+# checks, then stops only that child process.
+npm run test:curl:smoke
 ```
+
+Each script uses the documented mock contract, verifies the HTTP status, parses JSON
+with the repository's Node.js runtime, uses connect/total timeouts (5/15 seconds),
+resets its own test state, and cleans its wishlist mutation. The scripts require the
+runner's `CURL_DEDICATED_MOCK=1` marker, so they cannot reset an API/UI server owned by
+another run. Override `CURL_TEST_PORT`, `CURL_CONNECT_TIMEOUT`, or `CURL_MAX_TIME`
+when diagnosing; `BASE_URL` is set by the runner and remains local.
+The scripts have been run with macOS Bash and use Bash 3-compatible syntax; Linux is
+documented-compatible but is not claimed as locally executed evidence.
+
+## Verifiable coverage matrix
+
+Rows are groups, not additive scenario totals: the same API or UI Gherkin scenario
+may appear in more than one runner. “Real” means steps/browser requests execute;
+“dry-run” checks matching only.
+
+| Scenario/group | Tool | Command | Coverage status |
+| --- | --- | --- | --- |
+| Non-`@WIP` Gherkin selected by default/Acceptance/Smoke/Regression tags | Cucumber + Playwright definitions | `npm run test:pw:dry-run`, `test:pw:acceptance`, `test:pw:smoke`, `test:pw:regression` | Strict dry-run only; non-empty current JSON and no undefined/ambiguous step. No browser or API execution. |
+| Implemented `@API and not @WIP` scenarios | Playwright API + local mock | `npm run mock:start`; then `npm run test:api:all` (or a tagged suite) | Real API coverage; isolated in-memory mock and fresh JSON/Allure directory. |
+| Same implemented API set | Cypress API + local mock | `npm run mock:start`; then `npm run test:cypress:api:all` | Real API coverage; CI compares passed identities with Playwright. Overlap, not extra unique scenarios. |
+| Supported `@LocalUI and not @WIP` UI group (22 Examples/scenarios) | Playwright UI + local UI | `npm run test:ui:playwright` | Real browser run; rejects empty/non-passed JSON and retains diagnostics. |
+| Same supported UI group | Cypress UI + local UI | `npm run test:ui:cypress` | Real browser run; passed total must equal the same selection manifest. Overlaps Playwright UI. |
+| Ten API teaching checks | Bash cURL + local mock | `bash tests/automation/api/curl/01_login_success.sh` through `10_get_reviews.sh` | Real HTTP smoke checks, not a separate count of Gherkin coverage. |
+| Generated `@WIP @GeneratedDraft` API/E2E files | Parser + opt-in Cucumber dry-run | `npm run ai:generate:mock` or `npm run test:ai-generator` | Draft syntax/matching only; excluded from ordinary and real suites; external AI is optional and not used for baseline validation. |
+| Existing `@WIP` and non-`@LocalUI` model exclusions | — | — | Visible, but deliberately not passed/covered by normal gates. Booking, payment, cancellation, guest-capacity availability, ownership and persistent auth are outside the teaching model. |
+| `tests/automation/api/sql/*.sql` | — | — | PostgreSQL learning examples only. No database, connection, fixture lifecycle, or executable DB harness; not integration-test coverage. |
 
 ---
 
@@ -288,8 +308,8 @@ done
 | [`nightly-full-run.yml`](.github/workflows/nightly-full-run.yml) | Daily 00:00 UTC, manual | Four independent strict dry-run profiles |
 | [`api-mock-tests.yml`](.github/workflows/api-mock-tests.yml) | Pull request, push to `main`, daily 01:30 UTC, manual | Real API suites against a restarted mock, retained diagnostics and Allure report |
 
-The dry-run workflows type-check the TypeScript suite and fail on undefined
-non-WIP steps without opening a browser. The mock-server workflow runs API
+The dry-run workflows type-check the TypeScript suite and fail on undefined or
+ambiguous non-WIP steps without opening a browser. The mock-server workflow runs API
 tests for real, records every selected suite, and preserves reports on failure.
 Pages publishing is a separate job and never runs for pull requests.
 
@@ -303,8 +323,8 @@ exclusion is quantified in [stage 1 integration evidence](docs/stage-1-integrati
 
 ## Allure Reports
 
-API tests produce a full **Allure HTML report** as a CI artifact when results are
-available, including after a test failure.
+API tests produce a full **Allure HTML report** as a CI artifact only from current
+results. A runner with no current result must fail rather than publish an old report.
 
 ### Live report
 
@@ -326,7 +346,7 @@ Mock server starts (Express, port 3001)
         ↓
 Cucumber runs API tests against mock server
         ↓
-allure-cucumberjs writes results to allure-results/
+allure-cucumberjs writes results to reports/api/latest/allure-results/
         ↓
 allure generate → allure-report/ (HTML)
         ↓
@@ -339,10 +359,8 @@ GitHub Pages deploys report → live URL
 # Terminal 1 — start mock server
 npm run mock:start
 
-# Terminal 2 — run tests and generate report
+# Terminal 2 — run one fresh suite and generate its report
 npm run test:api:acceptance
-npm run test:api:smoke
-npm run test:api:regression
 npm run allure:generate
 npm run allure:open        # opens browser automatically
 ```
@@ -351,7 +369,10 @@ npm run allure:open        # opens browser automatically
 
 ## SQL Queries
 
-Located in `tests/automation/api/sql/`. Each query matches a specific test scenario and uses advanced SQL to validate data at the database layer:
+Located in `tests/automation/api/sql/`. These are educational PostgreSQL examples
+mapped to test ideas; they do **not** validate this mock server at a database layer.
+The repository has no test database, DB connection, migration/fixture lifecycle, or
+executable SQL harness. Do not report them as passed integration tests.
 
 - Window functions: `RANK()`, `ROW_NUMBER()`, `LAG()`, `PERCENT_RANK()`
 - CTEs (Common Table Expressions) for multi-step logic

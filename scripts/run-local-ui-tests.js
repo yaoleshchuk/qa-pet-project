@@ -15,6 +15,7 @@ if (!['playwright', 'cypress'].includes(runner)) {
 const port = Number(process.env.UI_TEST_PORT || (runner === 'playwright' ? 3106 : 3107));
 const baseUrl = `http://127.0.0.1:${port}`;
 const reportRoot = path.join('reports', 'ui', runner);
+fs.rmSync(reportRoot, { recursive: true, force: true });
 fs.mkdirSync(reportRoot, { recursive: true });
 const log = fs.createWriteStream(path.join(reportRoot, 'mock.log'));
 const server = spawn(process.execPath, ['mock-server/server.js'], {

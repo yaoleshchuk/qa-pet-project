@@ -86,7 +86,7 @@ module.exports = {
     format: ['progress-bar', 'allure-cucumberjs/reporter'],
     formatOptions: {
       snippetInterface: 'async-await',
-      resultsDir: 'allure-results',
+      resultsDir: process.env.ALLURE_RESULTS_DIR || 'allure-results',
     },
   },
 
@@ -101,7 +101,7 @@ module.exports = {
     format: ['progress-bar', 'allure-cucumberjs/reporter'],
     formatOptions: {
       snippetInterface: 'async-await',
-      resultsDir: 'allure-results',
+      resultsDir: process.env.ALLURE_RESULTS_DIR || 'allure-results',
     },
   },
 
@@ -116,7 +116,7 @@ module.exports = {
     format: ['progress-bar', 'allure-cucumberjs/reporter'],
     formatOptions: {
       snippetInterface: 'async-await',
-      resultsDir: 'allure-results',
+      resultsDir: process.env.ALLURE_RESULTS_DIR || 'allure-results',
     },
   },
 
@@ -131,7 +131,7 @@ module.exports = {
     format: ['progress-bar', 'allure-cucumberjs/reporter'],
     formatOptions: {
       snippetInterface: 'async-await',
-      resultsDir: 'allure-results',
+      resultsDir: process.env.ALLURE_RESULTS_DIR || 'allure-results',
     },
   },
 
