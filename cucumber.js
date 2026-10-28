@@ -57,8 +57,8 @@ module.exports = {
     require: [
       'tests/automation/api/playwright/world-api.ts',
       'tests/automation/api/playwright/api.steps.ts',
+      'tests/generator/ambiguous.steps.ts',
     ],
-    paths: ['tests/manual/features/drafts/api/**/*.feature'],
     tags: '@WIP and @GeneratedDraft and @API',
     format: ['summary'],
   },
@@ -69,7 +69,6 @@ module.exports = {
       'tests/automation/e2e/fixtures/world.ts',
       'tests/automation/e2e/playwright/steps/*.ts',
     ],
-    paths: ['tests/manual/features/drafts/e2e/**/*.feature'],
     tags: '@WIP and @GeneratedDraft and @E2E',
     format: ['summary'],
   },

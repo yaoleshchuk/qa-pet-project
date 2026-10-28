@@ -6,7 +6,8 @@ const root = path.resolve(__dirname, '..'); const args = process.argv.slice(2); 
 const file = value('--file'); const type = value('--type');
 if (!file || !['api', 'e2e'].includes(type)) { console.error('Usage: validate-generated-draft.js --file <draft.feature> --type <api|e2e>'); process.exit(2); }
 const draftRoot = path.resolve(root, 'tests/manual/features/drafts', type); const target = path.resolve(file);
-if (!target.startsWith(`${draftRoot}${path.sep}`) || path.extname(target) !== '.feature') { console.error('Draft must be a .feature file inside its type-specific drafts directory.'); process.exit(2); }
+if (!fs.existsSync(draftRoot) || fs.realpathSync.native(draftRoot) !== draftRoot || !target.startsWith(`${draftRoot}${path.sep}`) || path.extname(target) !== '.feature') { console.error('Draft must be a .feature file inside its non-symlink type-specific drafts directory.'); process.exit(2); }
+if (fs.lstatSync(target).isSymbolicLink()) { console.error('Draft file must not be a symbolic link.'); process.exit(2); }
 const messages = generateMessages(fs.readFileSync(target, 'utf8'), path.relative(root, target), 'text/x.cucumber.gherkin+plain', { includeSource: false, includeGherkinDocument: true, includePickles: true, newId: IdGenerator.uuid() });
 const errors = messages.filter(message => message.parseError).map(message => message.parseError.message); const pickles = messages.filter(message => message.pickle);
 if (errors.length || !pickles.length) { console.error(`Gherkin syntax validation failed: ${errors.join('; ') || 'no scenarios were parsed'}`); process.exit(1); }

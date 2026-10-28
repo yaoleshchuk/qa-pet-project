@@ -73,10 +73,14 @@ function normalize(raw: string, type: TestType, tags: string): string {
 function nextPath(type: TestType, description: string, technique: string): string {
   const dir = path.join(draftsRoot, type);
   fs.mkdirSync(dir, { recursive: true });
+  const expectedDirectory = path.resolve(dir);
+  if (fs.realpathSync.native(expectedDirectory) !== expectedDirectory) {
+    throw new Error('Drafts directory must not be a symbolic link.');
+  }
   const stem = `${technique === 'none' ? 'ai' : slug(technique)}_${slug(description)}`;
   for (let index = 1; ; index += 1) {
-    const candidate = path.resolve(dir, `${stem}${index === 1 ? '' : `_${index}`}.feature`);
-    if (path.dirname(candidate) !== dir) throw new Error('Generated draft path must stay inside its drafts directory.');
+    const candidate = path.resolve(expectedDirectory, `${stem}${index === 1 ? '' : `_${index}`}.feature`);
+    if (path.dirname(candidate) !== expectedDirectory) throw new Error('Generated draft path must stay inside its drafts directory.');
     if (!fs.existsSync(candidate)) return candidate;
   }
 }

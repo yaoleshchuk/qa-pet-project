@@ -26,7 +26,7 @@
 
 | Команда | Exit | Результат |
 | --- | ---: | --- |
-| `npm run test:ai-generator` | 0 | 4 проверки: валидный mock draft, empty/truncated/provider error без записи, коллизия без overwrite, malformed/undefined/zero-selection rejected |
+| `npm run test:ai-generator` | 0 | 6 проверок: tag/profile isolation; валидный mock draft; empty/truncated/provider error без записи; коллизия без overwrite; malformed/undefined/ambiguous/zero-selection rejected; symbolic-link path rejected |
 | `node node_modules/typescript/bin/tsc --noEmit` | 0 | TypeScript генератора и automation |
 | strict dry-run `default` / `acceptance` / `smoke` / `regression` | 0 | 76 / 24 / 21 / 51 selected scenarios; 0 undefined, 0 ambiguous |
 
@@ -51,6 +51,14 @@ Quality gate `Static and Dry-run Quality Gate` запускает `npm run test:
 This remote result verifies the current CI workflow, including the mock generator
 test; it does not call the external Claude provider. A later documentation-only head
 must be checked independently before this PR is ready to merge.
+
+### Финальное ревью 2026-10-28
+
+Review обнаружил и исправил два пробела: Cucumber profile больше не задаёт glob paths,
+поэтому CLI validator проверяет только переданный draft; lexical path checks дополнены
+realpath/lstat проверками для directory и file symlinks. Test suite теперь доказывает
+actual ambiguous match, а также `@WIP` isolation обычных profiles и явный opt-in matching.
+Внешний AI API не вызывался.
 
 ## Перевод черновика
 
