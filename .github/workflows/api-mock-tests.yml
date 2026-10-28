@@ -106,7 +106,12 @@ jobs:
       - name: Generate Allure HTML report
         id: allure
         if: always()
-        run: npx --no-install allure generate reports/allure-results --clean -o reports/allure-report
+        run: |
+          if ! find reports/allure-results -type f -name '*-result.json' -print -quit | grep -q .; then
+            echo 'No current Allure test result was produced; refusing to publish an empty report.' >&2
+            exit 1
+          fi
+          npx --no-install allure generate reports/allure-results --clean -o reports/allure-report
 
       - name: Upload API diagnostics
         if: always()

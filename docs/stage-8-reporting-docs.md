@@ -13,6 +13,8 @@
 - CI добавляет Allure formatter, когда добавляет JSON formatter: иначе CLI formatter
   заменяет профильный список и Allure results не появляются. UI-runner очищает только
   свой `reports/ui/<runner>/` перед запуском, исключая stale Cypress totals.
+- CI также требует хотя бы один текущий `*-result.json` перед генерацией Allure HTML:
+  заранее созданный пустой results directory не может дать зелёный report step.
 - Десять cURL scripts используют local mock по умолчанию, HTTP status, Node JSON parse,
   5/15-second curl timeouts, reset и cleanup wishlist. Bash 3-compatible syntax не
   требует `jq` или Python.
@@ -76,19 +78,12 @@ UI (50 s), Cypress UI (1m37s), typecheck (28 s) и все четыре strict dr
 
 ## Публикация и границы
 
-Не выполнялись внешний AI API, этап 9, DB harness и major audit migration. Удалённые
-CI results для этого нового head ещё не зафиксированы. Изолированный profile
-`/Users/yaroslav/.config/gh-qa-pet-personal` выбирает `yaoleshchuk`, но его token
-недействителен; `GH_TOKEN` и `GITHUB_TOKEN` unset, а Git HTTPS использует тот же
-`gh auth git-credential` helper. Профиль не смог прочитать repo API, а HTTPS push дал
-`403` (нет write access). В сообщении нет упоминания отсутствующего `workflow` scope:
-причина сейчас authentication/authorization, а не доказанный workflow-scope failure.
-Нужно ровно одно действие пользователя: выполнить
-`GH_CONFIG_DIR=/Users/yaroslav/.config/gh-qa-pet-personal gh auth login -h github.com -p https -w`
-под аккаунтом с write access к `yaoleshchuk/qa-pet-project`. Это не требует передачи
-токена в чат и не меняет global helper/SSH remote. После этого нужны normal push, draft
-PR и CI; они пока не были сфабрикованы. Локальные результаты выше не являются CI
-evidence. Исторические evidence предыдущих этапов не изменялись.
+Не выполнялись внешний AI API, этап 9, DB harness и major audit migration. Для
+публикации использован изолированный profile
+`/Users/yaroslav/.config/gh-qa-pet-personal`; вне task sandbox тот же `gh`, API и
+credential helper подтвердили доступ, после чего обычный HTTPS push создал draft PR #8.
+SSH remote, global helper и рабочие credentials не менялись. Локальные результаты выше
+не являются CI evidence. Исторические evidence предыдущих этапов не изменялись.
 
 ## Почему Acceptance содержит 49 видимых шагов
 
