@@ -39,7 +39,8 @@
     "allure:open": "allure open allure-report",
     "allure:serve": "allure serve allure-results",
     "ai:generate": "ts-node --project tsconfig.json scripts/ai-generate-feature.ts",
-    "ai:generate:mock": "ts-node --project tsconfig.json scripts/ai-generate-feature.ts --mock"
+    "ai:generate:mock": "ts-node --project tsconfig.json scripts/ai-generate-feature.ts --mock",
+    "test:ai-generator": "node --test tests/generator/ai-generate-feature.test.js"
   },
   "dependencies": {
     "express": "^4.19.2"

@@ -50,6 +50,29 @@ module.exports = {
     format: ['progress-bar'],
   },
 
+  // Draft matching is deliberately opt-in. It parses one generated @WIP draft
+  // and loads step definitions in --dry-run mode; no step or browser executes.
+  'draft-api-matching': {
+    requireModule: ['ts-node/register'],
+    require: [
+      'tests/automation/api/playwright/world-api.ts',
+      'tests/automation/api/playwright/api.steps.ts',
+      'tests/generator/ambiguous.steps.ts',
+    ],
+    tags: '@WIP and @GeneratedDraft and @API',
+    format: ['summary'],
+  },
+
+  'draft-e2e-matching': {
+    requireModule: ['ts-node/register'],
+    require: [
+      'tests/automation/e2e/fixtures/world.ts',
+      'tests/automation/e2e/playwright/steps/*.ts',
+    ],
+    tags: '@WIP and @GeneratedDraft and @E2E',
+    format: ['summary'],
+  },
+
   // ─── Real-execution profiles (run against mock API server, emit Allure) ─────
 
   'api-all': {

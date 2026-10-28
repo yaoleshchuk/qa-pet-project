@@ -24,6 +24,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run typecheck
+      - name: Validate generated Gherkin drafts in offline mock mode
+        run: npm run test:ai-generator
 
   dry-run:
     name: Strict dry-run - ${{ matrix.profile }}
