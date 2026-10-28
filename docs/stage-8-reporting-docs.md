@@ -63,6 +63,17 @@ Runner additionally waits for its child process's own listen message before acce
 а wishlist остался `{"wishlist":[321]}`. Следовательно, cURL scripts не запускались и
 не отправили reset чужому процессу.
 
+### Удалённый результат
+
+На draft PR #8 для `a2cb6163e7305e160c2e7bf2dff492be976c1393` GitHub Actions
+`Real API suites against local mock` завершился success за 38 s на `ubuntu-latest`.
+Его log подтверждает `npm run test:curl:smoke`, private mock на 3218 и десять
+последовательных строк PASS: login success, login rejection, city search, dated search,
+price filter, USD/EUR/GBP, wishlist add/remove, hotel details и reviews. Это фактический
+Linux run, не compatibility claim. В том же head прошли Cypress API (58 s), Playwright
+UI (50 s), Cypress UI (1m37s), typecheck (28 s) и все четыре strict dry-run profiles
+(17–25 s). Pages skipped ожидаемо для PR.
+
 ## Публикация и границы
 
 Не выполнялись внешний AI API, этап 9, DB harness и major audit migration. Удалённые
