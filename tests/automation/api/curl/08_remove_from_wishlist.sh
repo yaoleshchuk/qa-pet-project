@@ -1,31 +1,5 @@
 #!/usr/bin/env bash
-# ─────────────────────────────────────────────────────────────────────────────
-# Test:     Remove Hotel from Wishlist
-# Endpoint: DELETE /api/wishlist/123
-# Expected: HTTP 200, hotel_id no longer in body.wishlist
-# Auth:     Bearer token required
-# ─────────────────────────────────────────────────────────────────────────────
-set -euo pipefail
-
-BASE_URL="${BASE_URL:-https://api.booking.com}"
-AUTH_TOKEN="${AUTH_TOKEN:-}"
-HOTEL_ID=123
-
-echo "▶ DELETE ${BASE_URL}/api/wishlist/${HOTEL_ID}"
-
-response=$(curl -s -w "\n%{http_code}" -X DELETE \
-  "${BASE_URL}/api/wishlist/${HOTEL_ID}" \
-  -H "Accept: application/json" \
-  ${AUTH_TOKEN:+-H "Authorization: Bearer ${AUTH_TOKEN}"})
-
-http_code=$(echo "$response" | tail -n1)
-body=$(echo "$response" | sed '$d')
-
-echo "  Status : ${http_code}"
-echo "  Body   : ${body}"
-
-if [ "$http_code" -ne 200 ]; then
-  echo "❌ FAIL – expected 200, got ${http_code}" >&2; exit 1
-fi
-
-echo "✅ PASS – hotel ${HOTEL_ID} removed from wishlist"
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/common.bash"
+HOTEL_ID="${1:-321}"; reset_mock; request POST /api/wishlist "{\"hotel_id\":${HOTEL_ID}}"; expect_status 200; request DELETE "/api/wishlist/${HOTEL_ID}"; expect_status 200
+EXPECTED_HOTEL_ID="$HOTEL_ID" json_assert "Array.isArray(data.wishlist) && !data.wishlist.includes(Number(process.env.EXPECTED_HOTEL_ID))" 'deleted wishlist entry must not remain'
+echo "PASS: wishlist remove ($HOTEL_ID)"

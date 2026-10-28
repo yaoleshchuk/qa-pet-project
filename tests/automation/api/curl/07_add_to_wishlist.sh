@@ -1,36 +1,8 @@
 #!/usr/bin/env bash
-# ─────────────────────────────────────────────────────────────────────────────
-# Test:     Add Hotel to Wishlist
-# Endpoint: POST /api/wishlist
-# Expected: HTTP 200, body.wishlist contains hotel_id
-# Auth:     Bearer token required
-# ─────────────────────────────────────────────────────────────────────────────
-set -euo pipefail
-
-BASE_URL="${BASE_URL:-https://api.booking.com}"
-AUTH_TOKEN="${AUTH_TOKEN:-}"
-HOTEL_ID=123
-
-if [ -z "$AUTH_TOKEN" ]; then
-  echo "⚠ AUTH_TOKEN not set – request will be unauthenticated"
-fi
-
-echo "▶ POST ${BASE_URL}/api/wishlist  { hotel_id: ${HOTEL_ID} }"
-
-response=$(curl -s -w "\n%{http_code}" -X POST "${BASE_URL}/api/wishlist" \
-  -H "Content-Type: application/json" \
-  -H "Accept: application/json" \
-  ${AUTH_TOKEN:+-H "Authorization: Bearer ${AUTH_TOKEN}"} \
-  -d "{\"hotel_id\":${HOTEL_ID}}")
-
-http_code=$(echo "$response" | tail -n1)
-body=$(echo "$response" | sed '$d')
-
-echo "  Status : ${http_code}"
-echo "  Body   : ${body}"
-
-if [ "$http_code" -ne 200 ]; then
-  echo "❌ FAIL – expected 200, got ${http_code}" >&2; exit 1
-fi
-
-echo "✅ PASS – hotel ${HOTEL_ID} added to wishlist"
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/common.bash"
+HOTEL_ID="${1:-321}"; reset_mock
+cleanup_wishlist() { request DELETE "/api/wishlist/${HOTEL_ID}" || true; cleanup_body; }
+trap cleanup_wishlist EXIT
+request POST /api/wishlist "{\"hotel_id\":${HOTEL_ID}}"; expect_status 200
+EXPECTED_HOTEL_ID="$HOTEL_ID" json_assert "Array.isArray(data.wishlist) && data.wishlist.includes(Number(process.env.EXPECTED_HOTEL_ID))" 'new wishlist entry must be returned'
+echo "PASS: wishlist add ($HOTEL_ID)"

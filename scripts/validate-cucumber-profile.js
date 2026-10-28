@@ -67,6 +67,14 @@ const statuses = features.flatMap(feature =>
     (scenario.steps || []).map(step => step.result?.status || 'unknown')
   )
 );
+if (features.length === 0 || statuses.length === 0) {
+  console.error(`Strict dry-run (${profile}) selected no current executable steps; refusing a false-green report.`);
+  process.exit(1);
+}
+if (statuses.some(status => status === 'unknown')) {
+  console.error(`Strict dry-run (${profile}) report contains an unknown step status.`);
+  process.exit(1);
+}
 const undefinedSteps = statuses.filter(status => status === 'undefined').length;
 const ambiguousSteps = statuses.filter(status => status === 'ambiguous').length;
 

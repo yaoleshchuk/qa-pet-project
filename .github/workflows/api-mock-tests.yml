@@ -46,6 +46,9 @@ jobs:
           npm run lint:api-contract
           npm run test:api:contract
 
+      - name: Run cURL smoke checks against their dedicated mock
+        run: npm run test:curl:smoke
+
       - name: Run selected real API suites and record every result
         env:
           SELECTED_SUITE: ${{ github.event.inputs.suite || 'all' }}
@@ -83,6 +86,7 @@ jobs:
                 --profile "api-${suite}" \
                 --format summary \
                 --format "json:reports/api-${suite}.json" \
+                --format allure-cucumberjs/reporter \
                 --format-options "{\"resultsDir\":\"reports/allure-results/${suite}\"}"
               suite_exit=$?
               set -e
@@ -158,7 +162,7 @@ jobs:
 
           set +e
           API_URL=http://localhost:3001 npx --no-install cucumber-js --profile api-all \
-            --format summary --format json:reports/cypress-api/playwright-api.json \
+            --format summary --format json:reports/cypress-api/playwright-api.json --format allure-cucumberjs/reporter \
             --format-options '{"resultsDir":"reports/cypress-api/allure-playwright"}'
           playwright_exit=$?
           npm run test:cypress:api:all
