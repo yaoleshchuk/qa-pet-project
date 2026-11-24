@@ -5,8 +5,10 @@ import LocalStaysPage from '../pages/selectors';
 // reset only the mock process owned by this UI command before each scenario.
 const stays = () => new LocalStaysPage();
 const cards = () => cy.get('[data-testid="hotel-card"]');
+let expectedFilters = [];
 
 Before(() => {
+  expectedFilters = [];
   cy.request('POST', '/api/test/reset');
   cy.visit('/', { onBeforeLoad: (window) => window.sessionStorage.clear() });
 });
@@ -33,8 +35,8 @@ When('I enter email {string} and click {string}', (email, label) => {
 });
 When('I enter password {string} and click {string}', (password, label) => { stays().enterPassword(password); stays().clickButton(label); });
 When(/^I search for hotels in "([^"]+)" from "([^"]+)" to "([^"]+)" for "([^"]+)" adults$/, (city, checkin, checkout, adults) => stays().search(city, checkin, checkout, adults));
-When(/^I apply filter "([^"]+)"$/, (filter) => stays().applyFilter(filter));
-When('I apply filters: {string}, {string}, {string}', (first, second, third) => { stays().applyFilter(first); stays().applyFilter(second); stays().applyFilter(third); });
+When(/^I apply filter "([^"]+)"$/, (filter) => { expectedFilters = [filter]; stays().applyFilter(filter); });
+When('I apply filters: {string}, {string}, {string}', (first, second, third) => { expectedFilters = [first, second, third]; stays().applyFilter(first); stays().applyFilter(second); stays().applyFilter(third); });
 When(/^I sort results by "([^"]+)"$/, (option) => stays().sortBy(option));
 When(/^I click "Save" on the first hotel$/, () => cards().first().find('[data-testid="wishlist-button"]').click());
 When('I change currency to {string}', (currency) => stays().selectCurrency(currency));
@@ -85,6 +87,8 @@ Then('prices should be displayed in {string}', (symbol) => {
   cy.get('[data-testid="header-currency-picker-trigger"]').should('have.value', currency);
   cy.get('[data-testid="hotel-price"]').should(($prices) => {
   expect($prices.length).to.be.greaterThan(0);
+  const expected = { USD: ['$385.00 USD', '$214.50 USD'], EUR: ['€350.00 EUR', '€195.00 EUR'], GBP: ['£297.50 GBP', '£165.75 GBP'] };
+  expect([...$prices].map((price) => price.textContent).sort()).to.deep.equal(expected[currency].sort());
   [...$prices].forEach((price) => {
     expect(price.textContent).to.match(new RegExp(`^\\${symbol}`));
     expect(price.textContent).to.match(new RegExp(` ${currency}$`));
@@ -98,6 +102,9 @@ Then('the results should only include hotels matching those filters', () => {
   cy.get('[data-testid="filter-wifi"]').invoke('prop', 'checked').then((wifi) => {
     cy.get('[data-testid="filter-breakfast"]').invoke('prop', 'checked').then((breakfast) => {
       cy.get('[data-testid="filter-stars"]').invoke('val').then((stars) => cards().each(($card) => {
+        expect(wifi).to.equal(expectedFilters.includes('Free WiFi'));
+        expect(breakfast).to.equal(expectedFilters.includes('Breakfast included'));
+        expect(stars).to.equal(expectedFilters.find((filter) => filter.endsWith('stars'))?.[0] || '');
         if (wifi) expect($card.text()).to.include('WiFi');
         if (breakfast) expect($card.text()).to.include('Breakfast');
         if (stars) expect($card.text()).to.include(`${stars} stars`);

@@ -70,6 +70,7 @@ test('validator rejects malformed Gherkin, undefined/ambiguous steps, and an emp
     undefined: '@WIP @GeneratedDraft @API\nFeature: undefined\n  Scenario: bad\n    Given an unavailable generated step',
     ambiguous: '@WIP @GeneratedDraft @API\nFeature: ambiguous\n  Scenario: bad\n    Given I deliberately trigger an ambiguous draft step',
     empty_selection: '@WIP @API\nFeature: unselected\n  Scenario: valid but unselected\n    When I send POST request to /api/login with email "testuser@example.com" and password "correct_password"',
+    partial_selection: 'Feature: partially tagged\n  @WIP @GeneratedDraft @API\n  Scenario: selected\n    When I send POST request to /api/login with email "testuser@example.com" and password "correct_password"\n  Scenario: silently excluded\n    Given an unavailable generated step',
   };
   try {
     for (const [name, content] of Object.entries(cases)) {

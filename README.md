@@ -204,8 +204,8 @@ Each `test:api:*` run first removes `reports/api/latest/`, then writes its JSON 
 Allure results there. Thus `allure:generate` always consumes one current real run,
 never an old top-level `allure-results/` directory.
 
-> The mock server simulates all Booking.com API endpoints with realistic seed
-> data, enabling fully deterministic test results without network access.
+> The mock server implements the documented teaching contract with fixed seed
+> data; it does not simulate the full Booking.com API.
 
 ### Local teaching UI + mock API (manual browser exercise)
 
@@ -292,7 +292,7 @@ may appear in more than one runner. “Real” means steps/browser requests exec
 | Same implemented API set | Cypress API + local mock | `npm run mock:start`; then `npm run test:cypress:api:all` | Real API coverage; CI compares passed identities with Playwright. Overlap, not extra unique scenarios. |
 | Supported `@LocalUI and not @WIP` UI group (22 Examples/scenarios) | Playwright UI + local UI | `npm run test:ui:playwright` | Real browser run; rejects empty/non-passed JSON and retains diagnostics. |
 | Same supported UI group | Cypress UI + local UI | `npm run test:ui:cypress` | Real browser run; passed total must equal the same selection manifest. Overlaps Playwright UI. |
-| Ten API teaching checks | Bash cURL + local mock | `bash tests/automation/api/curl/01_login_success.sh` through `10_get_reviews.sh` | Real HTTP smoke checks, not a separate count of Gherkin coverage. |
+| Ten API teaching checks | Bash cURL + local mock | `npm run test:curl:smoke` | Real HTTP smoke checks, not a separate count of Gherkin coverage. |
 | Generated `@WIP @GeneratedDraft` API/E2E files | Parser + opt-in Cucumber dry-run | `npm run ai:generate:mock` or `npm run test:ai-generator` | Draft syntax/matching only; excluded from ordinary and real suites; external AI is optional and not used for baseline validation. |
 | Existing `@WIP` and non-`@LocalUI` model exclusions | — | — | Visible, but deliberately not passed/covered by normal gates. Booking, payment, cancellation, guest-capacity availability, ownership and persistent auth are outside the teaching model. |
 | `tests/automation/api/sql/*.sql` | — | — | PostgreSQL learning examples only. No database, connection, fixture lifecycle, or executable DB harness; not integration-test coverage. |

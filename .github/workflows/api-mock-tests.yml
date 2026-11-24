@@ -82,13 +82,12 @@ jobs:
               suite_exit=1
             else
               set +e
-              API_URL=http://localhost:3001 npx --no-install cucumber-js \
-                --profile "api-${suite}" \
-                --format summary \
-                --format "json:reports/api-${suite}.json" \
-                --format allure-cucumberjs/reporter \
-                --format-options "{\"resultsDir\":\"reports/allure-results/${suite}\"}"
+              API_URL=http://localhost:3001 node scripts/run-api-suite.js "$suite"
               suite_exit=$?
+              cp reports/api/latest/cucumber.json "reports/api-${suite}.json" 2>/dev/null || true
+              if [ -d reports/api/latest/allure-results ]; then
+                cp -R reports/api/latest/allure-results "reports/allure-results/${suite}"
+              fi
               set -e
             fi
 

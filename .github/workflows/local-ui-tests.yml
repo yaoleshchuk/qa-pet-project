@@ -12,7 +12,7 @@ permissions:
 jobs:
   playwright-ui:
     name: Playwright UI against isolated local mock
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -35,7 +35,7 @@ jobs:
 
   cypress-ui:
     name: Cypress UI against isolated local mock
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
