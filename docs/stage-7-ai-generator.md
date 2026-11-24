@@ -15,7 +15,7 @@
 - Имя нормализуется, пустое получает `generated_feature`, повторное имя получает суффикс;
   создание использует exclusive write и не может выйти за каталог drafts. При неуспешной
   проверке новый файл удаляется, существующие файлы не меняются.
-- Prompt реального сохранённого Claude provider использует тот же model `claude-opus-4-7`;
+- Prompt для Anthropic API использует ту же модель;
   он получает API-контракт либо ограничения локального UI и exact available step wording.
   Примеры используют фиксированные dates, не зависящие от текущего года. В этом этапе
   внешний AI API **не вызывался**.
@@ -49,7 +49,7 @@ Quality gate `Static and Dry-run Quality Gate` запускает `npm run test:
 | Publish latest Allure report to Pages | skipped as expected for a pull request |
 
 This remote result verifies the current CI workflow, including the mock generator
-test; it does not call the external Claude provider. A later documentation-only head
+test; it does not call the external API. A later documentation-only head
 must be checked independently before this PR is ready to merge.
 
 ### Финальное ревью 2026-10-28

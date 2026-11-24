@@ -1,8 +1,7 @@
 # Этап 3: Playwright API — шаги, assertions и изоляция
 
 Дата: 2026-09-27. Интегрированная база: `main` на commit
-`e788f11aff3276e6e68e0fef1d67ee703de7c92f`. Рабочая ветка:
-`codex/stage-3-api-isolation`.
+`e788f11aff3276e6e68e0fef1d67ee703de7c92f`.
 
 Исторические доказательства этапов 0–2 не изменялись. Этапы 4–9 и major-миграция
 Cucumber/Cypress не выполнялись.

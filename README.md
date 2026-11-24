@@ -32,7 +32,7 @@ A portfolio-focused **QA automation project** modelled on [Booking.com](https://
 
 ```
 scripts/
-├── ai-generate-feature.ts           # AI feature generator (Claude API or offline mock)
+├── ai-generate-feature.ts           # AI feature generator (API or offline mock)
 └── validate-generated-draft.js      # parser + explicit dry-run step matching
 
 tests/
@@ -385,7 +385,7 @@ executable SQL harness. Do not report them as passed integration tests.
 
 ## AI Feature Generator
 
-An interactive CLI tool that uses the **Claude API** to generate draft Gherkin `.feature` files from a plain-English description.
+An interactive CLI tool that uses the **Anthropic API** to generate draft Gherkin `.feature` files from a plain-English description.
 
 ### How it works
 
@@ -394,7 +394,7 @@ You describe what to test
         ↓
 CLI asks: test type, tags, test design technique
         ↓
-Claude API generates a draft Gherkin feature tagged @WIP + @API/@E2E
+The API generates a draft Gherkin feature tagged @WIP + @API/@E2E
         ↓
 It is saved under tests/manual/features/drafts/{e2e|api}/
         ↓
@@ -437,7 +437,7 @@ Example session:
   Techniques: 0) none  1) BVA  2) EP  3) Decision Table  4) State Transition  5) Error Guessing
 ? Test design technique (0–5): (0) 3
 
-  ⏳  Calling Claude API…
+  ⏳  Calling the provider API…
 
   ✅  Feature file generated!
      → tests/manual/features/e2e/decision_table_hotel_price_filter_with_currency_switch.feature
