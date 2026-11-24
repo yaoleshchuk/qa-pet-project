@@ -17,7 +17,7 @@ const result = spawnSync(process.execPath, [cucumber, '--profile', profile, '--d
 process.stdout.write(result.stdout || ''); process.stderr.write(result.stderr || '');
 if (result.error || !fs.existsSync(report)) { console.error(`Matching check could not produce a report: ${result.error?.message || 'missing JSON report'}`); process.exit(1); }
 const features = JSON.parse(fs.readFileSync(report, 'utf8')); fs.rmSync(report, { force: true }); const scenarios = features.flatMap(feature => feature.elements || []); const statuses = scenarios.flatMap(scenario => (scenario.steps || []).map(step => step.result?.status || 'unknown'));
-if (!scenarios.length || !statuses.length) { console.error('Matching check selected zero scenarios or steps; this is not a successful validation.'); process.exit(1); }
+if (scenarios.length !== pickles.length || !statuses.length || statuses.includes('unknown')) { console.error(`Matching check selected ${scenarios.length} of ${pickles.length} parsed scenarios or has missing step results; refusing partial validation.`); process.exit(1); }
 const undefinedCount = statuses.filter(status => status === 'undefined').length; const ambiguousCount = statuses.filter(status => status === 'ambiguous').length;
 if (undefinedCount || ambiguousCount || result.status !== 0) { console.error(`Step matching failed: ${undefinedCount} undefined, ${ambiguousCount} ambiguous.`); process.exit(1); }
 console.log(`Draft syntax and matching passed for ${scenarios.length} scenario(s), ${statuses.length} step(s); dry-run only, no steps or browser executed.`);

@@ -60,11 +60,13 @@ When(/^I search for hotels in "([^"]+)" from "([^"]+)" to "([^"]+)" for "([^"]+)
   await stays().search(city, checkin, checkout, adults);
 });
 
-When(/^I apply filter "([^"]+)"$/, async (filter: string) => {
+When(/^I apply filter "([^"]+)"$/, async function (this: { expectedFilters: string[] }, filter: string) {
+  this.expectedFilters = [filter];
   await stays().applyFilter(filter);
 });
 
-When('I apply filters: {string}, {string}, {string}', async (first: string, second: string, third: string) => {
+When('I apply filters: {string}, {string}, {string}', async function (this: { expectedFilters: string[] }, first: string, second: string, third: string) {
+  this.expectedFilters = [first, second, third];
   await stays().applyFilter(first);
   await stays().applyFilter(second);
   await stays().applyFilter(third);
@@ -136,6 +138,8 @@ Then('prices should be displayed in {string}', async (symbol: string) => {
   expect(prices.length).toBeGreaterThan(0);
   expect(await page.getByTestId('header-currency-picker-trigger').inputValue()).toBe(currency);
   expect(prices.every((price) => price.startsWith(symbol) && price.endsWith(` ${currency}`))).toBe(true);
+  const expected: Record<string, string[]> = { USD: ['$385.00 USD', '$214.50 USD'], EUR: ['€350.00 EUR', '€195.00 EUR'], GBP: ['£297.50 GBP', '£165.75 GBP'] };
+  expect(prices.sort()).toEqual(expected[currency].sort());
 });
 
 Then('the site should display text {string}', async (text: string) => {
@@ -157,11 +161,14 @@ Then('I should see a validation error message', async () => {
   await expect(page.locator('#search-error')).toBeVisible();
 });
 
-Then('the results should only include hotels matching those filters', async () => {
+Then('the results should only include hotels matching those filters', async function (this: { expectedFilters: string[] }) {
   const texts = await cardTexts();
   expect(texts.length).toBeGreaterThan(0);
   const wifi = await page.getByTestId('filter-wifi').isChecked();
   const breakfast = await page.getByTestId('filter-breakfast').isChecked();
   const stars = await page.getByTestId('filter-stars').inputValue();
+  expect(wifi).toBe(this.expectedFilters.includes('Free WiFi'));
+  expect(breakfast).toBe(this.expectedFilters.includes('Breakfast included'));
+  expect(stars).toBe(this.expectedFilters.find((filter) => filter.endsWith('stars'))?.[0] || '');
   expect(texts.every((text) => (!wifi || text.includes('WiFi')) && (!breakfast || text.includes('Breakfast')) && (!stars || text.includes(`${stars} stars`)))).toBe(true);
 });
